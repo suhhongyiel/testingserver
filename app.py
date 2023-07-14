@@ -8,7 +8,7 @@ st.write("testing?")
 
 def create_database():
     
-    conn = sqlite3.connect('customers.db')
+    conn = sqlite3.connect('./customers.db')
     c = conn.cursor()
     c.execute("""
     SELECT name FROM sqlite_master WHERE type='table' AND name='customers'
@@ -19,28 +19,28 @@ def create_database():
     conn.close()
 
 def add_customer(name, address, phone):
-    conn = sqlite3.connect('customers.db')
+    conn = sqlite3.connect('./customers.db')
     c = conn.cursor()
     c.execute("INSERT INTO customers VALUES (?, ?, ?)", (name, address, phone))
     conn.commit()
     conn.close()
 
 def delete_customer(name):
-    conn = sqlite3.connect('customers.db')
+    conn = sqlite3.connect('./customers.db')
     c = conn.cursor()
     c.execute("DELETE FROM customers WHERE name=?", (name,))
     conn.commit()
     conn.close()
 
 def update_customer(name, address, phone):
-    conn = sqlite3.connect('customers.db')
+    conn = sqlite3.connect('./customers.db')
     c = conn.cursor()
     c.execute("UPDATE customers SET address = ?, phone = ? WHERE name = ?", (address, phone, name))
     conn.commit()
     conn.close()
 
 def view_customers():
-    conn = sqlite3.connect('customers.db')
+    conn = sqlite3.connect('./customers.db')
     c = conn.cursor()
     c.execute("SELECT * FROM customers")
     customers = c.fetchall()
@@ -48,7 +48,7 @@ def view_customers():
     return customers
 
 def search_customer(name, phone):
-    conn = sqlite3.connect('customers.db')
+    conn = sqlite3.connect('./customers.db')
     c = conn.cursor()
     c.execute("SELECT * FROM customers WHERE name=? OR phone=?", (name, phone))
     customers = c.fetchall()
