@@ -44,16 +44,16 @@ if 'error_message' in st.session_state and st.session_state.error_message:
 if 'result_message' in st.session_state and st.session_state.result_message:
     con.write(st.session_state.result_message)
 
-# # DB input and connect
-# db = pymysql.connect(host='119.67.109.156', 
-#                 port=3306,
-#                 user='root', 
-#                 password='Korea2022!', 
-#                 db='project_wd', 
-#                 charset='utf8')
-# cursor = db.cursor()
+    # DB input and connect
+    db = pymysql.connect(host='119.67.109.156', 
+                    port=3306,
+                    user='root', 
+                    password='Korea2022!', 
+                    db='project_wd', 
+                    charset='utf8')
+    cursor = db.cursor()
 
-# sql2 = "INSERT INTO device_info (UID, START, ACCESS_TOKEN, status) VALUES (%s, %s, %s, %s)"
-# cursor.execute(sql2, ("smcfb.01.0099", "2023-07-14", "ee44", "o"))
-# db.commit()
-# db.close()
+    sql2 = "INSERT INTO device_info (UID, START, ACCESS_TOKEN, status) VALUES (%s, %s, %s, %s)"
+    cursor.execute(sql2, (input_user_name, input_start_date, input_access_token, status))
+    db.commit()
+    db.close()
