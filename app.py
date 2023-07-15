@@ -1,90 +1,52 @@
 import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
-import sqlite3
+import sqlite3 as lite
+from datetime import datetime, timedelta, date
 
 st.write("testing?")
 
+def cmpltTask(task):
+    idx = st.session_state.mytsks.index(task)
+    st.session_state.chkarr[idx] = not st.session_state.chkarr[idx]
+    st.session_state.rerun = True
 
-def create_database():
-    
-    conn = sqlite3.connect('./customers.db')
-    c = conn.cursor()
-    c.execute("""
-    SELECT name FROM sqlite_master WHERE type='table' AND name='customers'
-    """)
-    if not c.fetchone():
-        c.execute('''CREATE TABLE customers (name text, address text, phone text)''')
-        conn.commit()
-    conn.close()
-
-def add_customer(name, address, phone):
-    conn = sqlite3.connect('./customers.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO customers VALUES (?, ?, ?)", (name, address, phone))
-    conn.commit()
-    conn.close()
-
-def delete_customer(name):
-    conn = sqlite3.connect('./customers.db')
-    c = conn.cursor()
-    c.execute("DELETE FROM customers WHERE name=?", (name,))
-    conn.commit()
-    conn.close()
-
-def update_customer(name, address, phone):
-    conn = sqlite3.connect('./customers.db')
-    c = conn.cursor()
-    c.execute("UPDATE customers SET address = ?, phone = ? WHERE name = ?", (address, phone, name))
-    conn.commit()
-    conn.close()
-
-def view_customers():
-    conn = sqlite3.connect('./customers.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM customers")
-    customers = c.fetchall()
-    conn.close()
-    return customers
-
-def search_customer(name, phone):
-    conn = sqlite3.connect('./customers.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM customers WHERE name=? OR phone=?", (name, phone))
-    customers = c.fetchall()
-    conn.close()
-    return customers
+def listTasks():
+    st.session_state.tskclk = []
+    for i, task in enumerate(st.session_state.mytsks):
+        st.session_state.tskclk.append(st.checkbox(task, value = st.session_state.chkarr[i], key = 'l' + f'{dt.now():%d%m%Y%H%M%S%f}', on_change = cmpltTask, args=(task,), help ='Check to mark as completed'))
 
 
 def main():
     st.title("Customer Database App")
-    
-    
-    create_database()
 
-    name = st.text_input("Name")
-    address = st.text_input("Address")
-    phone = st.text_input("Phone Number")
-    st.sidebar.header("Click for operations")
-    if st.sidebar.button("Add"):
-        add_customer(name, address, phone)
+    if "mytsks" not in st.session_state:
+        st.session_state.mytsks = []
 
-    if st.sidebar.button("Delete"):
-        delete_customer(name)
+    if "tskclk" not in st.session_state:
+        st.session_state.tskclk = []
 
-    if st.sidebar.button("Update"):
-        update_customer(name, address, phone)
+    if "chkarr" not in st.session_state:
+        st.session_state.chkarr = []
+
+    if "rerun" not in st.session_state:
+        st.session_state.rerun = False
 
 
-    if st.sidebar.button("Search"):
-        customers = search_customer(name, phone)
-        st.header("Customers File")
-        st.table(customers)   
 
-    if st.sidebar.button("View"):
-        customers = view_customers()
-        st.header("Customers File")
-        st.table(customers)
+    if st.session_state.rerun == True:
+        st.session_state.rerun = False
+        st.experimental_rerun()
+
+    else:
+        tsk = st.text_input('Enter your tasks', value="", placeholder = 'Enter a task')
+        if st.button('Add Task'):
+            if tsk != "":
+                st.session_state.mytsks.append(tsk)
+                st.session_state.chkarr.append(False)
+
+    listTasks()
+
 
 if __name__ == '__main__':
     main()
