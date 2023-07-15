@@ -45,8 +45,9 @@ def main():
                 st.session_state.mytsks.append(tsk)
                 st.session_state.chkarr.append(False)
 
-    listTasks()
+    
 
 
 if __name__ == '__main__':
     main()
+    listTasks()
