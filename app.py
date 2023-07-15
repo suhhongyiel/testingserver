@@ -2,7 +2,7 @@ import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
 import sqlite3 as lite
-from datetime import datetime, timedelta, date
+from datetime import datetime as dt
 
 st.write("testing?")
 
