@@ -20,17 +20,29 @@ st.write('ACESS_TOKEN: ', ACCESS_TOKEN)
 st.write('satus: ', status)
 
 
-if 'submitted' not in st.session_state:
-    st.session_state.submitted = False
+def on_button_click():
+    st.session_state.error_message = ''
+    st.session_state.result_message = ''
+    if not str(st.session_state.user_name):
+        st.session_state.error_message = "Input your name please~"
+    else:
+        st.session_state.result_message = f"Hello~ {str(st.session_state.user_name)}"
 
-def update():
-    st.session_state.submitted = True
 
-# Your Form Here
-st.form_submit_button('Submit', on_click=update)
+st.title("Streamlit Test")
 
-if st.session_state.submitted:
-    st.write('Form submitted')
+input_user_name = st.text_input(label="User Name", key='user_name', value="")
+
+
+checkbox = st.checkbox('agree')
+st.button("Confirm", key='confirm_btn', disabled=(checkbox is False), on_click=on_button_click)
+
+con = st.container()
+con.caption("Result")
+if 'error_message' in st.session_state and st.session_state.error_message:
+    con.error(st.session_state.error_message)
+if 'result_message' in st.session_state and st.session_state.result_message:
+    con.write(st.session_state.result_message)
 
 # # DB input and connect
 # db = pymysql.connect(host='119.67.109.156', 
