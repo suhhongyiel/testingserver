@@ -23,11 +23,11 @@ def on_button_click():
 
 st.title("Streamlit Test")
 
-input_user_name = st.text_input(key = 'UID', value = '')
-input_start_date = st.text_input(key = 'START', value = '2023-07-14')
-input_access_token = st.text_input(key = 'ACESS_TOKEN', value = 'eyHDSDS ...')
+input_user_name = st.text_input(label="User Name", key = 'UID', value = '')
+input_start_date = st.text_input(label="start",key = 'START', value = '2023-07-14')
+input_access_token = st.text_input(label="acess_toiken",key = 'ACESS_TOKEN', value = 'eyHDSDS ...')
 # check box 로 바꿔서 실시간 데이터 베이스 전송 가능
-status = st.text_input('status', 'o OR x')
+status = st.text_input(label="status", key = 'status', value = 'o OR x')
 
 st.write('UID: ', input_user_name)
 st.write('START: ', input_start_date)
