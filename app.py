@@ -15,7 +15,7 @@ st.write("testing?")
 def on_button_click():
     st.session_state.error_message = ''
     st.session_state.result_message = ''
-    if not str(st.session_state.UID) and not str(st.session_state.START) and not str(st.session_state.ACESS_TOKEN) and not str(st.session_state.status):
+    if 'smcfb' in st.session_state.UID and not str(st.session_state.START) and not str(st.session_state.ACESS_TOKEN) and not str(st.session_state.status):
         st.session_state.error_message = "포멧을 정확히 입력해주세요"
     else:
         st.session_state.result_message = f"DB was updated {str(st.session_state.UID)}"
