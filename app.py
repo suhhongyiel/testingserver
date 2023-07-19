@@ -46,7 +46,7 @@ st.write('satus: ', status)
 
 
 # 체크 박스를 통해 시그널 전송 (상태 전송)
-checkbox = st.checkbox('agree')
+checkbox = st.checkbox('버튼잠금풀기')
 confirm_btn = st.button("Confirm", key='confirm_btn', disabled=(checkbox is False), on_click=on_button_click)
 
 con = st.container()
