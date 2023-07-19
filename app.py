@@ -25,7 +25,7 @@ def on_button_click():
         st.session_state.error_message = "시작 날짜 포멧을 정확히 입력해주세요"
     elif not len(str(st.session_state.ACESS_TOKEN)) == 273:
         st.session_state.error_message = "Acess Token 포멧을 정확히 입력해주세요"
-    elif str(st.session_state.status) != 'o' or str(st.session_state.status) != 'x':
+    elif str(st.session_state.status) != 'o' and str(st.session_state.status) != 'x':
         st.session_state.error_message = "Status 포멧을 정확히 입력해주세요 (o/x)"
     
     else:
