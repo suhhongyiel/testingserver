@@ -15,8 +15,19 @@ st.write("testing?")
 def on_button_click():
     st.session_state.error_message = ''
     st.session_state.result_message = ''
-    if 'smcfb' in st.session_state.UID and not str(st.session_state.START) and not str(st.session_state.ACESS_TOKEN) and not str(st.session_state.status):
-        st.session_state.error_message = "포멧을 정확히 입력해주세요"
+
+    # 포멧 양식 정하기
+
+
+    if 'smcfb' not in st.session_state.UID:
+        st.session_state.error_message = "UID 포멧을 정확히 입력해주세요"
+    elif not str(st.session_state.START):
+        st.session_state.error_message = "시작 날짜 포멧을 정확히 입력해주세요"
+    elif not str(st.session_state.ACESS_TOKEN):
+        st.session_state.error_message = "Acess Token 포멧을 정확히 입력해주세요"
+    elif not str(st.session_state.status):
+        st.session_state.error_message = "Status 포멧을 정확히 입력해주세요 (o/x)"
+    
     else:
         st.session_state.result_message = f"DB was updated {str(st.session_state.UID)}"
 
@@ -42,6 +53,7 @@ con.caption("Result")
 if 'error_message' in st.session_state and st.session_state.error_message:
     con.error(st.session_state.error_message)
 if 'result_message' in st.session_state and st.session_state.result_message:
+    st.write(st.session_state.START)
     con.write(st.session_state.result_message)
 
 
