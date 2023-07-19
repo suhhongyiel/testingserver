@@ -21,7 +21,7 @@ def on_button_click():
 
     if 'smcfb' not in st.session_state.UID:
         st.session_state.error_message = "UID 포멧을 정확히 입력해주세요"
-    elif str(st.session_state.START):
+    elif not str(st.session_state.START):
         st.session_state.error_message = "시작 날짜 포멧을 정확히 입력해주세요"
     elif not len(str(st.session_state.ACESS_TOKEN)) == 273:
         st.session_state.error_message = "Acess Token 포멧을 정확히 입력해주세요"
