@@ -11,14 +11,12 @@ st.write("testing?")
 
 
 
-
+# Confirm 버튼 클릭시에 발생
 def on_button_click():
     st.session_state.error_message = ''
     st.session_state.result_message = ''
 
-    # 포멧 양식 정하기
-
-
+    # 포멧 정하기
     if 'smcfb' not in st.session_state.UID:
         st.session_state.error_message = "UID 포멧을 정확히 입력해주세요"
     elif not str(st.session_state.START):
@@ -40,22 +38,24 @@ input_access_token = st.text_input(label="acess_toiken",key = 'ACESS_TOKEN', val
 # check box 로 바꿔서 실시간 데이터 베이스 전송 가능
 status = st.text_input(label="status", key = 'status', value = 'o OR x')
 
+# 입력된 데이터 출력
 st.write('UID: ', input_user_name)
 st.write('START: ', input_start_date)
 st.write('ACESS_TOKEN: ', input_access_token)
 st.write('satus: ', status)
 
+
+# 체크 박스를 통해 시그널 전송 (상태 전송)
 checkbox = st.checkbox('agree')
-st.button("Confirm", key='confirm_btn', disabled=(checkbox is False), on_click=on_button_click)
+confirm_btn = st.button("Confirm", key='confirm_btn', disabled=(checkbox is False), on_click=on_button_click)
 
 con = st.container()
 con.caption("Result")
+
 if 'error_message' in st.session_state and st.session_state.error_message:
     con.error(st.session_state.error_message)
 if 'result_message' in st.session_state and st.session_state.result_message:
-    st.write(st.session_state.START)
     con.write(st.session_state.result_message)
-
 
 
 
