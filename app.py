@@ -58,6 +58,7 @@ if 'result_message' in st.session_state and st.session_state.result_message:
     con.write(st.session_state.result_message)
 
 
+st.write(confirm_btn)
 
 
 # # DB input and connect
