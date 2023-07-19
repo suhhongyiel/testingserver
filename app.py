@@ -51,24 +51,26 @@ confirm_btn = st.button("Confirm", key='confirm_btn', disabled=(checkbox is Fals
 
 con = st.container()
 con.caption("Result")
-
+signal = 0
 if 'error_message' in st.session_state and st.session_state.error_message:
     con.error(st.session_state.error_message)
+    signal = 0
 if 'result_message' in st.session_state and st.session_state.result_message:
     con.write(st.session_state.result_message)
     st.write("Click button")
+    signal = 1
 
+if signal == 1:
+    # DB input and connect
+    db = pymysql.connect(host='119.67.109.156', 
+                    port=3306,
+                    user='root', 
+                    password='Korea2022!', 
+                    db='project_wd', 
+                    charset='utf8')
+    cursor = db.cursor()
 
-# # DB input and connect
-# db = pymysql.connect(host='119.67.109.156', 
-#                 port=3306,
-#                 user='root', 
-#                 password='Korea2022!', 
-#                 db='project_wd', 
-#                 charset='utf8')
-# cursor = db.cursor()
-
-# sql2 = "INSERT IGNORE INTO device_info (UID, START, ACCESS_TOKEN, status) VALUES (%s, %s, %s, %s)"
-# cursor.execute(sql2, (input_user_name, input_start_date, input_access_token, status))
-# db.commit()
-# db.close()
+    sql2 = "INSERT IGNORE INTO device_info (UID, START, ACCESS_TOKEN, status) VALUES (%s, %s, %s, %s)"
+    cursor.execute(sql2, (input_user_name, input_start_date, input_access_token, status))
+    db.commit()
+    db.close()
