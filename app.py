@@ -23,7 +23,7 @@ def page_home():
         st.session_state.result_message = ''
 
         # 포멧 정하기
-        if 'smcfb' not in st.session_state.UID:
+        if 'smcfb_' not in st.session_state.UID:
             st.session_state.error_message = "UID 포멧을 정확히 입력해주세요"
         elif not str(st.session_state.START):
             st.session_state.error_message = "시작 날짜 포멧을 정확히 입력해주세요"
@@ -38,7 +38,7 @@ def page_home():
 
     st.title("Streamlit Test")
 
-    input_user_name = st.text_input(label="User Name", key = 'UID', value = '')
+    input_user_name = st.text_input(label="User Name", key = 'UID', value = 'smcfb_01_099')
     input_start_date = st.text_input(label="start",key = 'START', value = '2023-07-14')
     input_access_token = st.text_input(label="acess_toiken",key = 'ACESS_TOKEN', value = 'eyHDSDS ...')
     # check box 로 바꿔서 실시간 데이터 베이스 전송 가능
