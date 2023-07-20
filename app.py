@@ -126,7 +126,7 @@ def get_table_data(smcfb_info):
 
             # Fetch all the data rows
             result = cursor.fetchall()
-            st.write(result)
+            # st.write(result)
             # Store the fetched data
             for row in result:
                 data.append(row)
