@@ -94,7 +94,7 @@ def page_about():
     tables_with_columns = get_table_names_with_columns()
     for table_name, columns in tables_with_columns.items():
         st.write(f"Table: {table_name}")
-        # print(f"Columns: {', '.join(columns)}")
+        st.write(f"Columns: {', '.join(columns)}")
         # print()
 
     # for i in all_name:
