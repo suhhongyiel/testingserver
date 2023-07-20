@@ -89,11 +89,13 @@ def page_about():
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names()
+
+
     tables_with_columns = get_table_names_with_columns()
     for table_name, columns in tables_with_columns.items():
-        print(f"Table: {table_name}")
-        print(f"Columns: {', '.join(columns)}")
-        print()
+        st.write(f"Table: {table_name}")
+        # print(f"Columns: {', '.join(columns)}")
+        # print()
 
     # for i in all_name:
     #     f{all_name}
