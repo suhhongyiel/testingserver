@@ -5,7 +5,12 @@ from datetime import datetime as dt
 import pymysql
 
 st.write("testing?")
-
+db = pymysql.connect(host='119.67.109.156', 
+                        port=3306,
+                        user='root', 
+                        password='Korea2022!', 
+                        db='project_wd', 
+                        charset='utf8')
 
 
 
@@ -42,7 +47,7 @@ def page_home():
     st.write('UID: ', input_user_name)
     st.write('START: ', input_start_date)
     st.write('ACESS_TOKEN: ', input_access_token)
-    st.write('satus: ', status)
+    st.write('status: ', status)
 
 
     # 체크 박스를 통해 시그널 전송 (상태 전송)
@@ -65,12 +70,7 @@ def page_home():
 
     if signal == 1:
         # DB input and connect
-        db = pymysql.connect(host='119.67.109.156', 
-                        port=3306,
-                        user='root', 
-                        password='Korea2022!', 
-                        db='project_wd', 
-                        charset='utf8')
+        
         cursor = db.cursor()
 
         sql2 = "INSERT IGNORE INTO device_info (UID, START, ACCESS_TOKEN, status) VALUES (%s, %s, %s, %s)"
@@ -80,7 +80,14 @@ def page_home():
 def page_about():
     st.title("About Page")
     # Add content for the about page
+    with db.cursor() as cursor:
+        cursor.execute("SELECT UID FROM device_info")
+        device_info_options = [row[0] for row in cursor.fetchall()]
 
+    device_info = st.selectbox("SELECT Device Info", device_info_options)
+    table_name = f"{device_info}"
+    st.info(f"Selected Device Info: {device_info}")
+    st.info(f"Table Name: {table_name}")
 
 
 def main():
