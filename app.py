@@ -5,7 +5,6 @@ from datetime import datetime as dt
 import pymysql
 import pandas as pd
 
-st.write("Cancer Data, Database")
 db = pymysql.connect(host='119.67.109.156', 
                         port=3306,
                         user='root', 
