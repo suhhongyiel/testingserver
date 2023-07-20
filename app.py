@@ -88,11 +88,9 @@ def page_about():
     table_name = f"{device_info}"
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
-    all_name = get_table_names()
+    all_name = get_table_names(table_name)
 
-
-    tables_with_columns = get_table_names_with_columns()
-    for table_name, columns in tables_with_columns.items():
+    for table_name, columns in all_name.items():
         st.write(f"Table: {table_name}")
         st.write(f"Columns: {', '.join(columns)}")
         # print()
@@ -101,20 +99,28 @@ def page_about():
     #     f{all_name}
 
 # dbeaver 에서 테이블 이름들 가져오기
-def get_table_names():
+def get_table_names(table_name):
     table_names = []
     try:
         with db.cursor() as cursor:
             # Execute the SHOW TABLES statement
-            cursor.execute("SHOW TABLES")
+            # cursor.execute("SHOW TABLES")
 
-            # Fetch all table names
+            # # Fetch all table names
+            # result = cursor.fetchall()
+
+            # # Extract the table names from the result
+            # for row in result:
+            #     table_names.append(row[0])
+            
+            query = "SHOW TABLES LIKE %s"
+            cursor.execute(query, (f"%{table_name}%",))
             result = cursor.fetchall()
-
-            # Extract the table names from the result
             for row in result:
                 table_names.append(row[0])
-            st.write(table_names)
+
+
+
     except pymysql.Error as e:
         print(f"An error occurred: {e}")
 
