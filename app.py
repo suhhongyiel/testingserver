@@ -65,9 +65,6 @@ def page_home():
         st.write("Click button")
         signal = 1
 
-
-
-
     if signal == 1:
         # DB input and connect
         
@@ -77,6 +74,9 @@ def page_home():
         cursor.execute(sql2, (input_user_name, input_start_date, input_access_token, status))
         db.commit()
         db.close()
+
+
+# 두번째 페이지
 def page_about():
     st.title("About Page")
     # Add content for the about page
@@ -88,6 +88,57 @@ def page_about():
     table_name = f"{device_info}"
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
+
+    savename = []
+    tables = get_table_names()
+    for i in tables:
+        if i == table_name:
+            savename.append(i)
+
+    uid_info = st.selectbox(savename)
+    st.info(f"Selected UID Info: {uid_info}") 
+
+
+# dbeaver 에서 테이블 이름들 가져오기
+def get_table_names():
+    table_names = []
+    try:
+        with db.cursor() as cursor:
+            # Execute the SHOW TABLES statement
+            cursor.execute("SHOW TABLES")
+
+            # Fetch all table names
+            result = cursor.fetchall()
+
+            # Extract the table names from the result
+            for row in result:
+                table_names.append(row[0])
+
+    except pymysql.Error as e:
+        print(f"An error occurred: {e}")
+
+    return table_names
+
+
+# Usage example
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def main():
