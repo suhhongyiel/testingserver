@@ -83,12 +83,17 @@ def page_about():
 
 
 
-pages = {
-    "Home": page_home,
-    "About": page_about,
-}
-st.sidebar.title("Navigation")
-selection = st.sidebar.radio("Go to", list(pages.keys()))
+def main():
+    pages = {
+        "Home": page_home,
+        "About": page_about,
+    }
 
-# Execute the selected page function
-pages[selection]()
+    st.sidebar.title("Navigation")
+    selection = st.sidebar.radio("Go to", list(pages.keys()))
+
+    # Execute the selected page function
+    pages[selection]()
+
+if __name__ == '__main__':
+    main()
