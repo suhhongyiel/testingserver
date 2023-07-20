@@ -88,8 +88,9 @@ def page_about():
     table_name = f"{device_info}"
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
+    all_name = get_table_names()
+    st.write(all_name)
 
-    st.write(device_info)
 
 # dbeaver 에서 테이블 이름들 가져오기
 def get_table_names():
