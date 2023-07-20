@@ -89,15 +89,7 @@ def page_about():
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
 
-    savename = []
-    tables = get_table_names()
-    for i in tables:
-        if i == table_name:
-            savename.append(i)
-
-    uid_info = st.selectbox(savename)
-    st.info(f"Selected UID Info: {uid_info}") 
-
+    print(device_info)
 
 # dbeaver 에서 테이블 이름들 가져오기
 def get_table_names():
