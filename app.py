@@ -122,6 +122,8 @@ def get_table_data(smcfb_info):
         with db.cursor() as cursor:
             # Execute the query to retrieve the data from the table
             query = f"SELECT * FROM {smcfb_info}"
+
+            st.write(query)
             cursor.execute(query)
 
             # Fetch all the data rows
