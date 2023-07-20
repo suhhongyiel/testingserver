@@ -89,30 +89,17 @@ def page_about():
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names(table_name)
-    st.write(all_name)
-    # for table_name, columns in all_name.items():
-    #     st.write(f"Table: {table_name}")
-    #     st.write(f"Columns: {', '.join(columns)}")
-        # print()
+    
 
-    # for i in all_name:
-    #     f{all_name}
+    smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
 
-# dbeaver 에서 테이블 이름들 가져오기
+
+# dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
     table_names = []
     try:
         with db.cursor() as cursor:
-            # Execute the SHOW TABLES statement
-            # cursor.execute("SHOW TABLES")
 
-            # # Fetch all table names
-            # result = cursor.fetchall()
-
-            # # Extract the table names from the result
-            # for row in result:
-            #     table_names.append(row[0])
-            
             query = "SHOW TABLES LIKE %s"
             cursor.execute(query, (f"%{table_name}%",))
             result = cursor.fetchall()
@@ -126,38 +113,7 @@ def get_table_names(table_name):
 
     return table_names
 
-# Get table names with columns 
-def get_table_names_with_columns():
-    table_dict = {}
-    try:
-        with db.cursor() as cursor:
-            # Execute the query to retrieve the table names
-            cursor.execute("SHOW TABLES")
-            
-            # Fetch all table names
-            result = cursor.fetchall()
-            # Iterate over table names
-            for row in result:
-                table_name = row[0]
-                columns = []
 
-                # Execute the query to retrieve the column names
-                cursor.execute(f"SHOW COLUMNS FROM {table_name}")
-
-                # Fetch all column names
-                columns_result = cursor.fetchall()
-
-                # Extract column names from the result
-                for column_row in columns_result:
-                    columns.append(column_row[0])
-
-                # Store the table name and its columns in the dictionary
-                table_dict[table_name] = columns
-            # st.write(table_name)
-    except pymysql.Error as e:
-        print(f"An error occurred: {e}")
-
-    return table_dict
 # Usage example
 
 
