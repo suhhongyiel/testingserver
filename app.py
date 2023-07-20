@@ -89,6 +89,12 @@ def page_about():
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names()
+    tables_with_columns = get_table_names_with_columns()
+    for table_name, columns in tables_with_columns.items():
+        print(f"Table: {table_name}")
+        print(f"Columns: {', '.join(columns)}")
+        print()
+
     # for i in all_name:
     #     f{all_name}
 
@@ -112,7 +118,39 @@ def get_table_names():
 
     return table_names
 
+# Get table names with columns 
+def get_table_names_with_columns():
+    table_dict = {}
+    try:
+        with db.cursor() as cursor:
+            # Execute the query to retrieve the table names
+            cursor.execute("SHOW TABLES")
+            
+            # Fetch all table names
+            result = cursor.fetchall()
+            
+            # Iterate over table names
+            for row in result:
+                table_name = row[0]
+                columns = []
 
+                # Execute the query to retrieve the column names
+                cursor.execute(f"SHOW COLUMNS FROM {table_name}")
+
+                # Fetch all column names
+                columns_result = cursor.fetchall()
+
+                # Extract column names from the result
+                for column_row in columns_result:
+                    columns.append(column_row[0])
+
+                # Store the table name and its columns in the dictionary
+                table_dict[table_name] = columns
+
+    except pymysql.Error as e:
+        print(f"An error occurred: {e}")
+
+    return table_dict
 # Usage example
 
 
