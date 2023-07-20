@@ -89,10 +89,10 @@ def page_about():
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names(table_name)
-
-    for table_name, columns in all_name.items():
-        st.write(f"Table: {table_name}")
-        st.write(f"Columns: {', '.join(columns)}")
+    st.write(all_name)
+    # for table_name, columns in all_name.items():
+    #     st.write(f"Table: {table_name}")
+    #     st.write(f"Columns: {', '.join(columns)}")
         # print()
 
     # for i in all_name:
@@ -153,7 +153,7 @@ def get_table_names_with_columns():
 
                 # Store the table name and its columns in the dictionary
                 table_dict[table_name] = columns
-            st.write(table_name)
+            # st.write(table_name)
     except pymysql.Error as e:
         print(f"An error occurred: {e}")
 
