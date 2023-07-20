@@ -92,7 +92,8 @@ def page_about():
     
 
     smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
-
+    smc_info = get_columns(smcfb_info)
+    st.write(smc_info)
 
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
@@ -113,6 +114,20 @@ def get_table_names(table_name):
 
     return table_names
 
+# dbeaver 에서 해당하는 데이터 Columns 가져오기
+def get_columns(smcfb_info):
+    try:
+        columns = []
+        with db.cursor() as cursor:
+            cursor.execute(f"SHOW COLUMNS FROM {smcfb_info}")
+            columns_result = cursor.fetchall()
+            for column_row in columns_result:
+                columns.append(column_row[0])
+
+    except pymysql.Error as e:
+        print(f"An error occurred: {e}")
+    
+    return columns
 
 # Usage example
 
