@@ -5,7 +5,7 @@ from datetime import datetime as dt
 import pymysql
 import pandas as pd
 
-st.write("testing?")
+st.write("Cancer Data, Database")
 db = pymysql.connect(host='119.67.109.156', 
                         port=3306,
                         user='root', 
@@ -36,7 +36,7 @@ def page_home():
             st.session_state.result_message = f"DB was updated {str(st.session_state.UID)}"
 
 
-    st.title("Streamlit Test")
+    st.title("환자 device 정보 추가")
 
     input_user_name = st.text_input(label="User Name", key = 'UID', value = 'smcfb_01_099')
     input_start_date = st.text_input(label="start",key = 'START', value = '2023-07-14')
