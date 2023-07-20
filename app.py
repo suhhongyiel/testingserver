@@ -170,7 +170,7 @@ def main():
         "환자데이터베이스": page_about,
     }
 
-    st.sidebar.title("Navigation")
+    st.sidebar.title("페이지이동")
     selection = st.sidebar.radio("Go to", list(pages.keys()))
 
     # Execute the selected page function
