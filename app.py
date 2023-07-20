@@ -79,7 +79,7 @@ def page_home():
 
 # 두번째 페이지
 def page_about():
-    st.title("About Page")
+    st.title("DataBase")
     # Add content for the about page
     with db.cursor() as cursor:
         cursor.execute("SELECT UID FROM device_info")
