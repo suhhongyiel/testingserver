@@ -166,8 +166,8 @@ def get_table_data(smcfb_info):
 
 def main():
     pages = {
-        "Home": page_home,
-        "About": page_about,
+        "기기정보추가": page_home,
+        "환자데이터베이스": page_about,
     }
 
     st.sidebar.title("Navigation")
