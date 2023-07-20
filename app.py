@@ -130,7 +130,7 @@ def get_table_names_with_columns():
             
             # Fetch all table names
             result = cursor.fetchall()
-            
+            st.write(result)
             # Iterate over table names
             for row in result:
                 table_name = row[0]
