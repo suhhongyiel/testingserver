@@ -92,6 +92,7 @@ def page_about():
     
 
     smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
+    st.write(smcfb_info)
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
