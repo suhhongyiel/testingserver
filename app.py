@@ -93,7 +93,7 @@ def page_about():
 
     smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
     st.write(smcfb_info)
-    smc_info = get_table_data("device_info")
+    smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
