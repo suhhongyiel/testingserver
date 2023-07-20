@@ -3,6 +3,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from datetime import datetime as dt
 import pymysql
+import pandas as pd
 
 st.write("testing?")
 db = pymysql.connect(host='119.67.109.156', 
@@ -96,6 +97,9 @@ def page_about():
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
+
+
+
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
     table_names = []
@@ -122,16 +126,17 @@ def get_table_data(smcfb_info):
         with db.cursor() as cursor:
             # Execute the query to retrieve the data from the table
             query = f"SELECT * FROM {smcfb_info}"
+            data = pd.read_sql_query(query, db)
 
-            st.write(query)
-            cursor.execute(query)
+            # st.write(query)
+            # cursor.execute(query)
 
-            # Fetch all the data rows
-            result = cursor.fetchall()
-            # st.write(result)
-            # Store the fetched data
-            for row in result:
-                data.append(row)
+            # # Fetch all the data rows
+            # result = cursor.fetchall()
+            # # st.write(result)
+            # # Store the fetched data
+            # for row in result:
+            #     data.append(row)
 
     except pymysql.Error as e:
         print(f"An error occurred: {e}")
