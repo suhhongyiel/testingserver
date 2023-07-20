@@ -92,9 +92,9 @@ def page_about():
     
 
     smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
-    st.write(smcfb_info)
+    # st.write(smcfb_info)
     smc_info = get_table_data("smcfb.01.001_AZM")
-    st.write(smc_info)
+    # st.write(smc_info)
 
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
