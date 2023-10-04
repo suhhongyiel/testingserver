@@ -129,8 +129,8 @@ def get_table_data(smcfb_info):
 # Usage example
 def main():
     pages = {
-        "기기정보추가": page_home,
-        "환자데이터베이스": page_about,
+        # "기기정보추가": page_home,
+        "환자데이터베이스": page_about
     }
 
     st.sidebar.title("페이지이동")
