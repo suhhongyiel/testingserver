@@ -12,7 +12,9 @@ db = pymysql.connect(host='119.67.109.156',
                         db='project_wd', 
                         charset='utf8')
 
-
+cursor = db.cursor()
+# if the connection was lost, then it reconnects
+db.ping(reconnect=True)
 
 
 def page_home():
@@ -122,16 +124,6 @@ def get_table_data(smcfb_info):
             # Execute the query to retrieve the data from the table
             query = f"SELECT * FROM {smcfb_info}"
             data = pd.read_sql_query(query, db)
-
-            # st.write(query)
-            # cursor.execute(query)
-
-            # # Fetch all the data rows
-            # result = cursor.fetchall()
-            # # st.write(result)
-            # # Store the fetched data
-            # for row in result:
-            #     data.append(row)
 
     except pymysql.Error as e:
         print(f"An error occurred: {e}")
