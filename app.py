@@ -68,7 +68,7 @@ def page_home():
         # DB input and connect
         
         cursor = db.cursor()
-        sql2 = "INSERT IGNORE INTO device_info (UID, START, ACCESS_TOKEN, status) VALUES (%s, %s, %s, %s)"
+        sql2 = "INSERT IGNORE INTO device_info (UID, START, CLIENT_ID, CLIENT_SECRET, ACCESS_TOKEN, Google_id, Google_pw) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         cursor.execute(sql2, (input_user_name, input_start_date, input_access_token, status))
         db.commit()
         db.close()
