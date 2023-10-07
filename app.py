@@ -189,6 +189,9 @@ def page_about():
         device_info_options = [row[0] for row in cursor.fetchall()]
 
     device_info = st.selectbox("SELECT Device Info", device_info_options)
+
+    st.write(device_info)
+
     table_name = f"{device_info}"
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
@@ -200,7 +203,7 @@ def page_about():
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
-    run_plot(smcfb_info, smc_info, device_info)
+    run_plot(table_name, smc_info, device_info)
 
 
 
