@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime as dt
 import pymysql
 import pandas as pd
+import subprocess
 
 db = pymysql.connect(host='119.67.109.156', 
                         port=3306,
@@ -90,7 +91,9 @@ def page_about():
     st.write(smc_info)
 
 
-
+    if st.button("Run fitbit_auto.py"):
+        subprocess.run(["python", "fitbit_auto.py"])
+        st.success("fitbit_auto.py executed!")
 
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
@@ -119,11 +122,12 @@ def get_table_data(smcfb_info):
             # Execute the query to retrieve the data from the table
             query = f"SELECT * FROM {smcfb_info}"
             data = pd.read_sql_query(query, db)
-
+    
     except pymysql.Error as e:
         print(f"An error occurred: {e}")
 
     return data
+
 
 
 # Usage example
@@ -132,7 +136,7 @@ def main():
         # "기기정보추가": page_home,
         "환자데이터베이스": page_about
     }
-
+    
     st.sidebar.title("페이지이동")
     selection = st.sidebar.radio("Go to", list(pages.keys()))
 
