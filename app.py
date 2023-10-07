@@ -150,30 +150,9 @@ def plot_activity(df, min_date, max_date):
     plt.show()
 
 
-
-
-
-# 두번째 페이지
-def page_about():
-    st.title("DataBase")
-    # Add content for the about page
-    with db.cursor() as cursor:
-        cursor.execute("SELECT study_ID FROM device_info_temp")
-        device_info_options = [row[0] for row in cursor.fetchall()]
-
-    device_info = st.selectbox("SELECT Device Info", device_info_options)
-    table_name = f"{device_info}"
-    st.info(f"Selected Device Info: {device_info}")
-    st.info(f"Table Name: {table_name}")
-    all_name = get_table_names(table_name)
-    
-
-    smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
-    # st.write(smcfb_info)
-    smc_info = get_table_data(smcfb_info)
-    st.write(smc_info)
-
+def run_plot(smcfb_info, smc_info, device_info):
 #여기서 plot 을 표시해야함
+
     if smcfb_info in smcfb_info + "_휴식기심박수":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
         plot_resting(df, min_date, max_date)
@@ -199,6 +178,31 @@ def page_about():
 
     elif smcfb_info in smcfb_info + "_분별HRV":
         st.write("GG6")
+
+
+# 두번째 페이지
+def page_about():
+    st.title("DataBase")
+    # Add content for the about page
+    with db.cursor() as cursor:
+        cursor.execute("SELECT study_ID FROM device_info_temp")
+        device_info_options = [row[0] for row in cursor.fetchall()]
+
+    device_info = st.selectbox("SELECT Device Info", device_info_options)
+    table_name = f"{device_info}"
+    st.info(f"Selected Device Info: {device_info}")
+    st.info(f"Table Name: {table_name}")
+    all_name = get_table_names(table_name)
+    
+
+    smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
+    # st.write(smcfb_info)
+    smc_info = get_table_data(smcfb_info)
+    st.write(smc_info)
+
+    run_plot(smcfb_info, smc_info, device_info)
+
+
 
 
     
