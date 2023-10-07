@@ -189,6 +189,7 @@ def page_about():
         device_info_options = [row[0] for row in cursor.fetchall()]
 
     device_info = st.selectbox("SELECT Device Info", device_info_options)
+    st.write("This is ")
 
     st.write(device_info)
 
