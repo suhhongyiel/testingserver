@@ -112,7 +112,7 @@ def plot_resting(df, min_date, max_date):
         ax.tick_params(axis='x', rotation=45)
         
     plt.tight_layout()
-    st.pyplot(fig)
+    return fig
 
 def plot_activity(df, min_date, max_date):
 
@@ -147,7 +147,7 @@ def plot_activity(df, min_date, max_date):
     axes[2].set_ylabel('Value')
 
     plt.tight_layout()
-    st.pyplot(fig)
+    return fig
 
 
 
@@ -178,11 +178,13 @@ def page_about():
 
     if smcfb_info in table_name + "_휴식기심박수":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
-        plot_resting(df, min_date, max_date)
+        p1 = plot_resting(df, min_date, max_date)
+        st.pyplot(p1)
 
     elif smcfb_info in table_name + "_활동량":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
-        plot_activity(df, min_date, max_date)
+        p2 = plot_activity(df, min_date, max_date)
+        st.pyplot(p2)
 
     elif smcfb_info in table_name + "_AZM분별활동":
         st.write("gg1")
