@@ -200,7 +200,7 @@ def page_about():
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
-    run_plot(table_name, smc_info, device_info)
+    run_plot(smcfb_info, smc_info, device_info)
 
 
 
