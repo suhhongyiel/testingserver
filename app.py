@@ -152,7 +152,7 @@ def plot_activity(df, min_date, max_date):
 
 def run_plot(smcfb_info, smc_info, device_info):
 #여기서 plot 을 표시해야함
-
+    
     if smcfb_info in smcfb_info + "_휴식기심박수":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
         plot_resting(df, min_date, max_date)
@@ -200,7 +200,7 @@ def page_about():
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
-    run_plot(smcfb_info, smc_info, device_info)
+    run_plot(table_name, smc_info, device_info)
 
 
 
