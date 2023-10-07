@@ -112,7 +112,7 @@ def plot_resting(df, min_date, max_date):
         ax.tick_params(axis='x', rotation=45)
         
     plt.tight_layout()
-    plt.show()
+    st.pyplot(fig)
 
 def plot_activity(df, min_date, max_date):
 
@@ -147,7 +147,8 @@ def plot_activity(df, min_date, max_date):
     axes[2].set_ylabel('Value')
 
     plt.tight_layout()
-    plt.show()
+    st.pyplot(fig)
+
 
 
 
