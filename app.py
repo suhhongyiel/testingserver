@@ -5,69 +5,152 @@ from datetime import datetime as dt
 import pymysql
 import pandas as pd
 import subprocess
-
-db = pymysql.connect(host='119.67.109.156', 
-                        port=3306,
-                        user='root', 
-                        password='Korea2022!', 
-                        db='project_wd', 
-                        charset='utf8')
-
-def page_home():
-    # Confirm 버튼 클릭시에 발생
-    def on_button_click():
-        st.session_state.error_message = ''
-        st.session_state.result_message = ''
-
-        # 포멧 정하기
-        if 'smcfb_' not in st.session_state.UID:
-            st.session_state.error_message = "UID 포멧을 정확히 입력해주세요"
-        elif not str(st.session_state.START):
-            st.session_state.error_message = "시작 날짜 포멧을 정확히 입력해주세요"
-        elif not len(str(st.session_state.ACESS_TOKEN)) == 273:
-            st.session_state.error_message = "Acess Token 포멧을 정확히 입력해주세요"
-        elif str(st.session_state.status) != 'o' and str(st.session_state.status) != 'x':
-            st.session_state.error_message = "Status 포멧을 정확히 입력해주세요 (o/x)"
-        
-        else:
-            st.session_state.result_message = f"DB was updated {str(st.session_state.UID)}"
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import numpy as np
+from dateutil import parser
+from datetime import datetime
 
 
-    st.title("환자 device 정보 추가")
-
-    input_user_name = st.text_input(label="User Name", key = 'UID', value = 'smcfb_01_099')
-    input_start_date = st.text_input(label="start",key = 'START', value = '2023-07-14')
-    input_access_token = st.text_input(label="acess_toiken",key = 'ACESS_TOKEN', value = 'eyHDSDS ...')
-    # check box 로 바꿔서 실시간 데이터 베이스 전송 가능
-    status = st.text_input(label="status", key = 'status', value = 'o OR x')
-
-    # 입력된 데이터 출력
-    st.write('UID: ', input_user_name)
-    st.write('START: ', input_start_date)
-    st.write('ACESS_TOKEN: ', input_access_token)
-    st.write('status: ', status)
-
-
-    # 체크 박스를 통해 시그널 전송 (상태 전송)
-    # checkbox = st.checkbox('버튼잠금풀기')
-    # confirm_btn = st.button("Confirm", key='confirm_btn', disabled=(checkbox is False), on_click=on_button_click)
-
-    con = st.container()
-    con.caption("Result")
+def shade_zero_data(ax, data_df, data):
+    is_zero = data_df == 0
+    zero_dates = data[is_zero]['date'].tolist()
     
-    if 'error_message' in st.session_state and st.session_state.error_message:
-        con.error(st.session_state.error_message)
-    if 'result_message' in st.session_state and st.session_state.result_message:
-        con.write(st.session_state.result_message)
+    if not zero_dates:
+        return
+    
+    start = zero_dates[0]
+    for current_date, next_date in zip(zero_dates, zero_dates[1:] + [None]):
+        if next_date and (next_date - current_date).days == 1:  # If they are consecutive
+            continue
+        else:
+            ax.axvspan(start, current_date, color='grey', alpha=0.5)
+            if next_date:
+                start = next_date
 
-    if st.button("Click me"):
-        # DB input and connect
+
+
+def shade_negative_one_data(ax, data_df, data):
+    is_negative_one = data_df == -1
+    negative_one_dates = data[is_negative_one]['date'].tolist()
+    
+    if not negative_one_dates:
+        return
+    
+    start = negative_one_dates[0]
+    for current_date, next_date in zip(negative_one_dates, negative_one_dates[1:] + [None]):
+        if next_date and (next_date - current_date).days == 1:  # If they are consecutive
+            continue
+        else:
+            ax.axvspan(start, current_date, color='grey', alpha=0.5)
+            if next_date:
+                start = next_date
+
+def convert_date(date_str):
+    if not isinstance(date_str, str):
+        return date_str
+    try:
+        # First, try parsing with ISO format
+        return pd.to_datetime(date_str, format='%Y-%m-%d', errors='raise').strftime('%Y-%m-%d')
+    except:
+        # If the above fails, try parsing with %m/%d/%Y format
+        return pd.to_datetime(date_str, format='%m/%d/%Y', errors='raise').strftime('%Y-%m-%d')
+
+def extract_range_data(uid_table, uid, smcfb_info):
+
+    df = uid_table
+    # df = uid_table deep copy를 생성하여 원본 데이터에 영향을 주지 않습니다.
+    df = uid_table.copy()
+
+    # 날짜 변환 전에 date 열의 고유한 값들을 확인합니다.
+    unique_dates = df['date'].unique()
+    # Convert the 'date' column values to datetime objects    
+    # Now format the datetime values to the desired string format
+    df['date'] = df['date'].apply(convert_date)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.drop_duplicates(subset='date', keep='first')
+    
+    
+    min_date = df['date'].min()
+    max_date = df['date'].max()
+
+    print(min_date)
+    print(max_date)
+
+    return df, min_date, max_date
+
+
+
+
+# Test the function
+# extract_range_data(["file1.csv", "file2.csv", ...], "sample_uid", [start_date, end_date])
+
+
+
+def plot_resting(df, min_date, max_date):
+    fig, ax = plt.subplots(figsize=(12, 6))
+    axes = [ax] 
+
+    data_sorted = df.sort_values(by='date')
+
+    time = data_sorted['date']
+    sample = data_sorted['resting_hr'] 
+
+
+    axes[0].plot(time, sample, '-o', label="resting_hr", color='black')
+    shade_negative_one_data(axes[0], data_sorted['resting_hr'], data_sorted)
+    axes[0].set_title('resting_hr')
+    axes[0].set_ylabel('Value')
+    
+
+    # x축 날짜 형식 설정
+    for ax in axes:
+        ax.set_xlim(min_date, max_date)
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
+        ax.tick_params(axis='x', rotation=45)
         
-        cursor = db.cursor()
-        sql2 = "INSERT IGNORE INTO device_info (UID, START, ACCESS_TOKEN, status) VALUES (%s, %s, %s, %s)"
-        cursor.execute(sql2, (input_user_name, input_start_date, input_access_token, status))
-        db.commit()
-        db.close()
+    plt.tight_layout()
+    plt.show()
+
+def plot_activity(df, min_date, max_date):
+
+    # PLOT GRAPH
+    fig, axes = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
+    data_sorted = df.sort_values(by='date')
+    sample = data_sorted['distance'] 
+    time = data_sorted['date']
+    # Set the title for the entire plot
+    plt.suptitle(f"{data_sorted['user_id'][0]}", fontsize=16)  # Assuming file_name is something like "name.csv"
+    # distance 에대한 plot
+    axes[0].plot(time, sample, '-o', label="Distance", color='blue')
+    shade_zero_data(axes[0], data_sorted['distance'], data_sorted)
+
+    axes[0].set_title('Distance')
+    axes[0].set_ylabel('Value')
+
+    # Steps 에대한 plot
+    sample = data_sorted['steps']
+    
+    axes[1].plot(time, sample, '-o', label="Steps", color='navy')
+    shade_zero_data(axes[1], data_sorted['steps'], data_sorted)
+    axes[1].set_title('Steps')
+    axes[1].set_ylabel('Value')
+
+    # calories 에 대한 plot
+    sample = data_sorted['calories']
+    
+    axes[2].plot(time, sample, '-o', label="calories", color='darkblue')
+    shade_zero_data(axes[2], data_sorted['calories'], data_sorted)
+    axes[2].set_title('calories')
+    axes[2].set_ylabel('Value')
+
+    plt.tight_layout()
+    plt.show()
+
+
+
 
 
 # 두번째 페이지
@@ -89,6 +172,16 @@ def page_about():
     # st.write(smcfb_info)
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
+
+#여기서 plot 을 표시해야함
+    if smcfb_info in smcfb_info + "_휴식기심박수":
+        df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
+        plot_resting(df, min_date, max_date)
+
+    elif smcfb_info in smcfb_info + "_활동량":
+# print(smc_info['user_id'])
+        df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
+        plot_activity(df, min_date, max_date)
 
 
     if st.button("Run fitbit_auto.py"):
@@ -128,7 +221,12 @@ def get_table_data(smcfb_info):
 
     return data
 
-
+db = pymysql.connect(host='119.67.109.156', 
+                        port=3306,
+                        user='root', 
+                        password='Korea2022!', 
+                        db='project_wd', 
+                        charset='utf8')
 
 # Usage example
 def main():
@@ -145,3 +243,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
