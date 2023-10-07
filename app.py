@@ -175,30 +175,30 @@ def page_about():
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
-    if table_name in table_name + "_휴식기심박수":
+    if smcfb_info in table_name + "_휴식기심박수":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
         plot_resting(df, min_date, max_date)
 
-    elif table_name in table_name + "_활동량":
+    elif smcfb_info in table_name + "_활동량":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
         plot_activity(df, min_date, max_date)
 
-    elif table_name in table_name + "_AZM분별활동":
+    elif smcfb_info in table_name + "_AZM분별활동":
         st.write("gg1")
 
-    elif table_name in table_name + "_분별심박수":
+    elif smcfb_info in table_name + "_분별심박수":
         st.write("gg2")
 
-    elif table_name in table_name + "_수면상세":
+    elif smcfb_info in table_name + "_수면상세":
         st.write("gg3")
 
-    elif table_name in table_name + "_수면요약":
+    elif smcfb_info in table_name + "_수면요약":
         st.write("gg4")
 
-    elif table_name in table_name + "_활동량":
+    elif smcfb_info in table_name + "_활동량":
         st.write("gg5")
 
-    elif table_name in table_name + "_분별HRV":
+    elif smcfb_info in table_name + "_분별HRV":
         st.write("GG6")
 
 
