@@ -179,27 +179,26 @@ def page_about():
         plot_resting(df, min_date, max_date)
 
     elif smcfb_info in smcfb_info + "_활동량":
-# print(smc_info['user_id'])
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
         plot_activity(df, min_date, max_date)
 
     elif smcfb_info in smcfb_info + "_AZM분별활동":
-        extract_range_data(smcfb_info, device_info)
+        st.write("gg1")
 
     elif smcfb_info in smcfb_info + "_분별심박수":
-        print("gg")
+        st.write("gg2")
 
     elif smcfb_info in smcfb_info + "_수면상세":
-        print("gg")
+        st.write("gg3")
 
     elif smcfb_info in smcfb_info + "_수면요약":
-        print("gg")
+        st.write("gg4")
 
     elif smcfb_info in smcfb_info + "_활동량":
-        print("gg")
+        st.write("gg5")
 
     elif smcfb_info in smcfb_info + "_분별HRV":
-        print("GG")
+        st.write("GG6")
 
 
     
