@@ -183,7 +183,26 @@ def page_about():
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
         plot_activity(df, min_date, max_date)
 
+    elif smcfb_info in smcfb_info + "_AZM분별활동":
+        extract_range_data(smcfb_info, device_info)
 
+    elif smcfb_info in smcfb_info + "_분별심박수":
+        print("gg")
+
+    elif smcfb_info in smcfb_info + "_수면상세":
+        print("gg")
+
+    elif smcfb_info in smcfb_info + "_수면요약":
+        print("gg")
+
+    elif smcfb_info in smcfb_info + "_활동량":
+        print("gg")
+
+    elif smcfb_info in smcfb_info + "_분별HRV":
+        print("GG")
+
+
+    
     if st.button("Run fitbit_auto.py"):
         subprocess.run(["python", "fitbit_auto.py"])
         st.success("fitbit_auto.py executed!")
