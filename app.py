@@ -150,35 +150,6 @@ def plot_activity(df, min_date, max_date):
     plt.show()
 
 
-def run_plot(smcfb_info, smc_info, device_info):
-#여기서 plot 을 표시해야함
-    
-    if smcfb_info in smcfb_info + "_휴식기심박수":
-        df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
-        plot_resting(df, min_date, max_date)
-
-    elif smcfb_info in smcfb_info + "_활동량":
-        df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
-        plot_activity(df, min_date, max_date)
-
-    elif smcfb_info in smcfb_info + "_AZM분별활동":
-        st.write("gg1")
-
-    elif smcfb_info in smcfb_info + "_분별심박수":
-        st.write("gg2")
-
-    elif smcfb_info in smcfb_info + "_수면상세":
-        st.write("gg3")
-
-    elif smcfb_info in smcfb_info + "_수면요약":
-        st.write("gg4")
-
-    elif smcfb_info in smcfb_info + "_활동량":
-        st.write("gg5")
-
-    elif smcfb_info in smcfb_info + "_분별HRV":
-        st.write("GG6")
-
 
 # 두번째 페이지
 def page_about():
@@ -204,9 +175,31 @@ def page_about():
     smc_info = get_table_data(smcfb_info)
     st.write(smc_info)
 
-    run_plot(table_name, smc_info, device_info)
+    if table_name in table_name + "_휴식기심박수":
+        df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
+        plot_resting(df, min_date, max_date)
 
+    elif table_name in table_name + "_활동량":
+        df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
+        plot_activity(df, min_date, max_date)
 
+    elif table_name in table_name + "_AZM분별활동":
+        st.write("gg1")
+
+    elif table_name in table_name + "_분별심박수":
+        st.write("gg2")
+
+    elif table_name in table_name + "_수면상세":
+        st.write("gg3")
+
+    elif table_name in table_name + "_수면요약":
+        st.write("gg4")
+
+    elif table_name in table_name + "_활동량":
+        st.write("gg5")
+
+    elif table_name in table_name + "_분별HRV":
+        st.write("GG6")
 
 
     
