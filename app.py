@@ -274,8 +274,22 @@ def page_download():
     all_name = get_table_names(table_name)
 
     st.write(all_name)
+    # AZM_data = get_table_data(all_name[0])
+    # df, min_date, max_date = extract_range_data(AZM_data, device_info, all_name[0])
 
+    # AZM_data = get_table_data(all_name[2])
+    # df, min_date, max_date = extract_range_data(AZM_data, device_info, all_name[2])
 
+    # AZM_data = get_table_data(all_name[3])
+    # df, min_date, max_date = extract_range_data(AZM_data, device_info, all_name[3])
+
+    # AZM_data = get_table_data(all_name[4])
+    # df, min_date, max_date = extract_range_data(AZM_data, device_info, all_name[4])
+
+    resting_heart_data = get_table_data(all_name[5])
+    df5, min_date5, max_date5 = extract_range_data(resting_heart_data, device_info, all_name[5])
+    p1 = plot_resting(df5, min_date5, max_date5)
+    st.pyplot(p1)
 
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
