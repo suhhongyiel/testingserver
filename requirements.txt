@@ -2,5 +2,5 @@ numpy
 matplotlib
 pymysql
 pandas
-FPDF
+fpdf
 io
