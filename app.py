@@ -257,25 +257,6 @@ def page_about():
         st.success("fitbit_auto.py executed!")
 
 import io
-from fpdf import FPDF
-from base64 import b64encode
-
-@st.cache
-def save_plots_to_pdf(figs):
-    pdf = FPDF()
-    
-    for fig in figs:
-        img_stream = io.BytesIO()
-        fig.savefig(img_stream, format="png")
-        img_stream.seek(0)
-
-        pdf.add_page()
-        pdf.image(img_stream, x = 10, y = 20, w = 190)
-    
-    filename = "multiplot_output.pdf"
-    pdf.output(filename)
-    return filename
-
 
 def page_download():
     st.write("download")
@@ -323,15 +304,19 @@ def page_download():
 
     figs = [psleep, pact, p1]
 
-    if st.button("Plot들을 PDF로 다운로드"):
-        filename = save_plots_to_pdf(figs)
-        with open(filename, "rb") as f:
-            st.download_button(
-                label="PDF 다운로드",
-                data=f,
-                file_name="multiplot_output.pdf",
-                mime="application/pdf"
-            )
+    # Create an in-memory buffer
+    buffer = io.BytesIO()
+    figs.write_image(file=buffer, format="pdf")
+    # Download the pdf from the buffer
+    st.download_button(
+        label="Download PDF",
+        data=buffer,
+        file_name="figure.pdf",
+        mime="application/pdf",
+    )
+
+    st.plotly_chart(figs)
+
 
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
