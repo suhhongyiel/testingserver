@@ -696,7 +696,7 @@ def api_call():
         for idx, row in df.iterrows():
             if not pd.isnull(row['ACCESS_TOKEN']) and not pd.isnull(row['START']):
                 user_id = row['study_ID']
-                if user_id == "smcfb_01_00１":
+                if user_id == "smcfb_01_001":
                     access_token = row['ACCESS_TOKEN']
                     start_date = row['START']
                     end_date = datetime.now()
