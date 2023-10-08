@@ -270,6 +270,29 @@ def min_by_heartrate(set_time, user_id, directory, header):
     # Sig for top row
     row_sig = 1
 
+def min_by_heartrate(set_time, user_id, directory, header):
+    # 분별 심박수
+    # 만약 데이터가없으면 기본값을 배출하게 됩니다.
+    Heart_rate_min = requests.get(f'https://api.fitbit.com/1/user/-/activities/heart/date/'+set_time+'/1d.json', headers=header).json()
+    # print("pass Heart_rate_min (IF request too many then get error)")
+    # 분별 심박수
+    with open(directory + '/' + user_id + '_분별심박수.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        if file.tell() == 0:
+            field = ["user_id", "date","time_min", "value"]
+            writer.writerow(field)
+    # By date
+        if Heart_rate_min['activities-heart-intraday']['dataset'] == []:
+            print("Except Code: Heart rate value in minute are empty")
+            writer.writerow([user_id, Heart_rate_min['activities-heart'][0]['dateTime'], '-1', '-1'])
+        else:
+            for i in Heart_rate_min['activities-heart-intraday']['dataset']: #by daily 
+                writer.writerow([user_id, Heart_rate_min['activities-heart'][0]['dateTime'], i['time'], i['value']])
+
+
+    # Sig for top row
+    row_sig = 1
+
 
 import re
 import pandas as pd
@@ -327,30 +350,4 @@ def get_data_for_user(user_id, missing_dates, header, directory):
             call_count += 1
 
     return True
-
-patient_log = pd.read_excel('Fitbit_device_log.xlsx')
-
-for i in range(len(patient_log)):
-    if not pd.isnull(patient_log['ACCESS_TOKEN'][i]):
-        if not pd.isnull(patient_log['생성일자'][i]):
-
-            user_id = patient_log.study_ID[i]
-            if user_id != "smcfb.01.087":
-                print("Current user_id: ", user_id)
-                access_token = patient_log.ACCESS_TOKEN[i]
-
-                
-                directory = f"./fitbit_output/{user_id}"
-                createFolder(directory)
-                
-                header = {'Authorization': 'Bearer {}'.format(access_token)}
-                response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
-                
-                start_date = patient_log['생성일자'][i]
-                
-                end_date = datetime.now()
-                missing_dates = get_missing_dates(directory, user_id, start_date, end_date)
-
-                #사용자의 데이터를 가져옴. 만약 15번 호출 제한에 도달하면 중지
-                if not get_data_for_user(user_id, missing_dates, header, directory):
-                    print(f"Reached API call limit for user: {user_id}. Skipping to the next user.")
+    
