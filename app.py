@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 import numpy as np
 from dateutil import parser
 from datetime import datetime
-from fpdf import FPDF
+
 
 
 def shade_zero_data(ax, data_df, data):
@@ -257,7 +257,10 @@ def page_about():
         st.success("fitbit_auto.py executed!")
 
 import io
+from fpdf import FPDF
+from base64 import b64encode
 
+@st.cache
 def save_plots_to_pdf(figs):
     pdf = FPDF()
     
