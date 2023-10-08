@@ -656,9 +656,9 @@ def get_data_for_user(user_id, missing_dates, header):
             # sleep_summary(time_set, user_id, header)
             # sleep_detail(time_set, user_id, header)
             # AZM(time_set, user_id, header)
-            # HRV_min(time_set, user_id, header)
+            HRV_min(time_set, user_id, header)
             # min_by_heartrate(time_set, user_id, header)
-            rest_HR(time_set, user_id, header)
+            # rest_HR(time_set, user_id, header)
 
 
         except Exception as e:
