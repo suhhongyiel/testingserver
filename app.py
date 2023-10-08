@@ -363,11 +363,9 @@ from datetime import datetime, timedelta
 import re
 import requests
 
-
 # 버튼 Click 하면 아래 코드가 실행:
 
-
-# 버튼 Click 하면 아래 코드가 실행:
+# api call from here
 def Activity(set_time, user_id, header):
     try:
         # 하루 활동량# 활동량
@@ -422,7 +420,7 @@ def rest_HR(set_time, user_id, header):
                 rh = -1
             
             # INSERT 쿼리 작성
-            query = "INSERT INTO " + user_id + "_휴식기심박수" + "(user_id, date, resting_hr) VALUES (%s, %s, %s)"
+            query = "INSERT INTO " + user_id + "_휴식기심박수 " + "(user_id, date, resting_hr) VALUES (%s, %s, %s)"
 
             # 데이터베이스에 데이터 삽입
             with db.cursor() as cursor:
@@ -659,10 +657,9 @@ def get_data_for_user(user_id, missing_dates, header):
             sleep_detail(time_set, user_id, header)
             AZM(time_set, user_id, header)
             HRV_min(time_set, user_id, header)
-            # min_by_heartrate(time_set, user_id, header)
+            min_by_heartrate(time_set, user_id, header)
             rest_HR(time_set, user_id, header)
 
-            st.write("All data updated")
 
         except Exception as e:
             error_message = str(e)
@@ -702,9 +699,6 @@ def api_call():
                     end_date = datetime.now()
 
                     missing_dates = get_missing_dates(user_id, start_date, end_date)
-                    formatted_dates = [date.strftime("%m/%d/%Y") for date in missing_dates]
-                    print(formatted_dates)
-
 
                     # Data api call From here
                     header = {'Authorization': 'Bearer {}'.format(access_token)}
