@@ -273,7 +273,7 @@ def page_download():
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names(table_name)
 
-    st.write(all_name)
+    st.write(all_name[5])
     # AZM_data = get_table_data(all_name[0])
     # df, min_date, max_date = extract_range_data(AZM_data, device_info, all_name[0])
 
