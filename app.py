@@ -250,11 +250,7 @@ def page_about():
     elif smcfb_info in table_name + "_분별HRV":
         st.write("GG6")
 
-
-    
-    if st.button("Run fitbit_auto.py"):
-        subprocess.run(["python", "fitbit_auto.py"])
-        st.success("fitbit_auto.py executed!")
+    api_call()
 
 import io
 from fpdf import FPDF
@@ -341,8 +337,6 @@ def get_table_names(table_name):
             for row in result:
                 table_names.append(row[0])
 
-
-
     except pymysql.Error as e:
         print(f"An error occurred: {e}")
 
@@ -362,12 +356,105 @@ def get_table_data(smcfb_info):
 
     return data
 
+import os
+from datetime import datetime, timedelta
+import re
+import requests
+
+def get_existing_data_dates(user_id):
+    
+    table_name = f"{user_id}"
+    all_name = get_table_names(table_name)
+
+    uid_table_name = "smcfb_01_001_휴식기심박수"
+    # st.write(smcfb_info)
+    smc_info = get_table_data(uid_table_name)
+    return smc_info['date'].tolist()
+
+
+def get_missing_dates(user_id, start_date, end_date):
+    existing_dates = get_existing_data_dates(user_id)
+
+    formatted_existing_dates = [
+    date if isinstance(date, str) and re.match(r'\d{4}-\d{2}-\d{2}', date) else datetime.strptime(date, '%m/%d/%Y').strftime('%Y-%m-%d') 
+    for date in existing_dates if isinstance(date, str)
+    ]
+
+    # 날짜 문자열들을 datetime 객체로 변환
+    date_format1 = "%m/%d/%Y %H:%M"
+    date_format2 = "%Y-%m-%d %H:%M:%S.%f"
+
+    # datetime 객체인지 확인하여 문자열이면 변환
+    if isinstance(start_date, str):
+        date1 = datetime.strptime(start_date, date_format1)
+    else:
+        date1 = start_date
+
+    if isinstance(end_date, str):
+        date2 = datetime.strptime(end_date, date_format2)
+    else:
+        date2 = end_date
+
+    # 날짜 차이 계산
+    date_difference = date2.date() - date1.date()
+    all_dates = [date1 + timedelta(days=x) for x in range(0, date_difference.days)]
+
+    missing_dates = [date for date in all_dates if date.strftime('%Y-%m-%d') not in formatted_existing_dates]
+
+    return missing_dates
+
+def api_call():
+    # 날짜별로 파악 fitbit_auto.py 실행
+    # 버튼 Click 하면 아래 코드가 실행:
+    if st.button('Click to Execute'):
+
+        # Add content for the about page
+        with db.cursor() as cursor:
+            cursor.execute("SELECT * FROM device_info_temp")
+            device_info_options = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]  # 컬럼 이름 가져오기
+            df = pd.DataFrame(device_info_options, columns=columns)
+
+
+        
+
+        print(pd.isnull(df['ACCESS_TOKEN'][0]))
+        results = []
+
+        for i in range(len(df)):
+            if not pd.isnull(df['ACCESS_TOKEN'][i]):
+                if not pd.isnull(df['START'][i]):
+                    user_id = df.study_ID[i]
+                    if user_id == "smcfb_01_001":
+                        access_token = df.ACCESS_TOKEN[i]
+                        # header = {'Authorization': 'Bearer {}'.format(access_token)}
+                        # response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
+                        start_date = df['START'][i]
+                        end_date = datetime.now()
+
+                        missing_dates = get_missing_dates(user_id, start_date, end_date)
+
+
+
+                        # Data api call From here
+                        header = {'Authorization': 'Bearer {}'.format(access_token)}
+                        response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
+                        st.write(response)
+
+
 db = pymysql.connect(host='119.67.109.156', 
                         port=3306,
                         user='root', 
                         password='Korea2022!', 
                         db='project_wd', 
                         charset='utf8')
+
+
+
+
+
+
+
 
 # Usage example
 def main():

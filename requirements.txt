@@ -3,3 +3,6 @@ matplotlib
 pymysql
 pandas
 fpdf2
+requests
+re
+datetime
