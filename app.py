@@ -723,24 +723,35 @@ def api_call():
             df = pd.DataFrame(device_info_options, columns=columns)
 
         st.write(df)
+        
+        # 진행바 및 메시지 초기화
+        progress_bar = st.progress(0)
+        status_message = st.empty()
 
-        for i in range(len(df)):
-            if not pd.isnull(df['ACCESS_TOKEN'][i]):
-                if not pd.isnull(df['START'][i]):
-                    user_id = df.study_ID[i]
-                    if user_id == "smcfb_01_001":
-                        access_token = df.ACCESS_TOKEN[i]
-                        start_date = df['START'][i]
-                        end_date = datetime.now()
+        total_users = len(df)
+        
+        for idx, row in df.iterrows():
+            if not pd.isnull(row['ACCESS_TOKEN']) and not pd.isnull(row['START']):
+                user_id = row['study_ID']
+                if user_id == "smcfb_01_001":
+                    access_token = row['ACCESS_TOKEN']
+                    start_date = row['START']
+                    end_date = datetime.now()
 
-                        missing_dates = get_missing_dates(user_id, start_date, end_date)
+                    missing_dates = get_missing_dates(user_id, start_date, end_date)
 
-                        # Data api call From here
-                        header = {'Authorization': 'Bearer {}'.format(access_token)}
-                        response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
-                        st.write("start call data")
-                        if not get_data_for_user(user_id, missing_dates, header):
-                            st.write(f"Reached API call limit for user: {user_id}. Skipping to the next user.")
+                    # Data api call From here
+                    header = {'Authorization': 'Bearer {}'.format(access_token)}
+                    response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
+                    status_message.text(f"Processing data for user: {user_id}")
+                    if not get_data_for_user(user_id, missing_dates, header):
+                        st.write(f"Reached API call limit for user: {user_id}. Skipping to the next user.")
+            
+            # 진행바 업데이트
+            progress = int((idx + 1) / total_users * 100)
+            progress_bar.progress(progress)
+        
+        status_message.text("Processing completed!")
 
 db = pymysql.connect(host='119.67.109.156', 
                         port=3306,
