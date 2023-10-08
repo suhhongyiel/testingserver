@@ -420,7 +420,7 @@ def rest_HR(set_time, user_id, header):
                 rh = -1
             
             # INSERT 쿼리 작성
-            query = "INSERT INTO " + user_id + "_휴식기심박수" + "(user_id, date, resting_hr) VALUES (%s, %s, %s)"
+            query = "INSERT INTO " + user_id + "_휴식기심박수 " + "(user_id, date, resting_hr) VALUES (%s, %s, %s)"
 
             # 데이터베이스에 데이터 삽입
             with db.cursor() as cursor:
@@ -453,7 +453,7 @@ def sleep_summary(set_time, user_id, header):
     totalTimeInBed = sleep_data['summary']['totalTimeInBed']
 
     # INSERT 쿼리 작성
-    query = "INSERT INTO " + user_id + "_수면요약 (user_id, date, totalMinutesAsleep, totalSleepRecords, totalTimeInBed, stages_deep, stages_light, stages_rem, stages_wake, efficiency, cnt_deep, cnt_light, cnt_rem, cnt_wake) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    query = "INSERT INTO " + user_id + "_수면요약 " + "(user_id, date, totalMinutesAsleep, totalSleepRecords, totalTimeInBed, stages_deep, stages_light, stages_rem, stages_wake, efficiency, cnt_deep, cnt_light, cnt_rem, cnt_wake) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
     # 데이터베이스에 데이터 삽입
     with db.cursor() as cursor:
@@ -465,7 +465,7 @@ def sleep_detail(set_time, user_id, header):
     sleep_detail = requests.get(f'https://api.fitbit.com/1.2/user/-/sleep/date/' + set_time + '.json', headers=header).json()
 
     # INSERT 쿼리 작성
-    query = "INSERT INTO " + user_id + "_수면상세 (user_id, date, time_stamp, sleep_stage, sleep_duration) VALUES (%s, %s, %s, %s, %s)"
+    query = "INSERT INTO " + user_id + "_수면상세 " + "(user_id, date, time_stamp, sleep_stage, sleep_duration) VALUES (%s, %s, %s, %s, %s)"
 
     if sleep_detail['sleep'] == []:
         print("User Warning Code: Sleep data is empty , sent message to wear device")
@@ -491,7 +491,7 @@ def AZM(set_time, user_id, header):
     activity_zone_minute = requests.get(f'https://api.fitbit.com/1/user/-/activities/active-zone-minutes/date/'+set_time+'/1d.json', headers=header).json()
 
     # INSERT 쿼리 작성
-    query = "INSERT INTO " + user_id + "_AZM분별활동 (user_id, date, activeZoneMinutes, fatBurnActiveZoneMinutes, cardioActiveZoneMinutes) VALUES (%s, %s, %s, %s, %s)"
+    query = "INSERT INTO " + user_id + "_AZM분별활동 " + "(user_id, date, activeZoneMinutes, fatBurnActiveZoneMinutes, cardioActiveZoneMinutes) VALUES (%s, %s, %s, %s, %s)"
 
     if activity_zone_minute["activities-active-zone-minutes"] == []:
         print(f"AZM is not detected at {set_time}")
@@ -513,7 +513,7 @@ def HRV_min(set_time, user_id, header):
     HRV_min = requests.get(f'https://api.fitbit.com/1/user/-/hrv/date/'+set_time+'/all.json', headers=header).json()
 
     # INSERT 쿼리 작성
-    query = "INSERT INTO " + user_id + "_분별HRV (user_id, date, time, rmssd, coverage, hf, lf) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    query = "INSERT INTO " + user_id + "_분별HRV " + "(user_id, date, time, rmssd, coverage, hf, lf) VALUES (%s, %s, %s, %s, %s, %s, %s)"
 
     try:
         for i in range(len(HRV_min['hrv'][0]['minutes'][0]['minute'])):
@@ -537,7 +537,7 @@ def min_by_heartrate(set_time, user_id, header):
     Heart_rate_min = requests.get(f'https://api.fitbit.com/1/user/-/activities/heart/date/'+set_time+'/1d.json', headers=header).json()
 
     # INSERT 쿼리 작성
-    query = "INSERT INTO " + user_id + "_분별심박수 (user_id, date, time_min, value) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO " + user_id + "_분별심박수 " + "(user_id, date, time_min, value) VALUES (%s, %s, %s, %s)"
 
     # By date
     if not Heart_rate_min['activities-heart-intraday']['dataset']:
@@ -556,7 +556,7 @@ def get_existing_data_dates(user_id):
     table_name = f"{user_id}"
     all_name = get_table_names(table_name)
 
-    uid_table_name = "smcfb_01_001_휴식기심박수"
+    uid_table_name = user_id + "_휴식기심박수"
     # st.write(smcfb_info)
     smc_info = get_table_data(uid_table_name)
     return smc_info['date'].tolist()
@@ -607,6 +607,8 @@ def get_data_for_user(user_id, missing_dates, header):
             HRV_min(time_set, user_id, header)
             min_by_heartrate(time_set, user_id, header)
             rest_HR(time_set, user_id, header)
+
+            st.write("All data updated")
 
         except Exception as e:
             error_message = str(e)
