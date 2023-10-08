@@ -250,6 +250,7 @@ def page_about():
     elif smcfb_info in table_name + "_분별HRV":
         st.write("GG6")
 
+    # api call
     api_call()
 
 import io
@@ -397,6 +398,34 @@ def Activity(set_time, user_id, header):
     st.write("insert db")
     db.commit()
 
+def rest_HR(set_time, user_id, header):
+    # 휴식기 심박수
+    try:
+        heart_rate_request = requests.get(f'https://api.fitbit.com/1/user/-/activities/heart/date/'+set_time+'/'+set_time+'.json',
+                                            headers=header).json()
+    except:
+        print("would be 429 Error occur")
+
+    try:
+        for i in heart_rate_request['activities-heart']:
+            try:
+                rh_date = i['dateTime']
+                rh = i['value']['restingHeartRate']
+            except:
+                print("resting heart rate is not detected")
+                rh = -1
+            
+            # INSERT 쿼리 작성
+            query = "INSERT INTO " + user_id + "_휴식기심박수" + "(user_id, date, resting_hr) VALUES (%s, %s, %s)"
+
+            # 데이터베이스에 데이터 삽입
+            with db.cursor() as cursor:
+                cursor.execute(query, (user_id, rh_date, rh))
+            db.commit()
+    except:
+        print("would be Error when you request too much times api in short-times")
+
+
 def get_existing_data_dates(user_id):
     
     table_name = f"{user_id}"
@@ -447,6 +476,7 @@ def get_data_for_user(user_id, missing_dates, header):
         try:
             time_set = current_date.strftime('%Y-%m-%d')
             Activity(time_set, user_id, header)
+            rest_HR(time_set, user_id, header)
 
         except Exception as e:
             error_message = str(e)
@@ -469,14 +499,14 @@ def api_call():
             columns = [desc[0] for desc in cursor.description]  # 컬럼 이름 가져오기
             df = pd.DataFrame(device_info_options, columns=columns)
 
+        st.write(df)
+
         for i in range(len(df)):
             if not pd.isnull(df['ACCESS_TOKEN'][i]):
                 if not pd.isnull(df['START'][i]):
                     user_id = df.study_ID[i]
-                    if user_id == "smcfb_01_002":
+                    if user_id == "smcfb_01_001":
                         access_token = df.ACCESS_TOKEN[i]
-                        # header = {'Authorization': 'Bearer {}'.format(access_token)}
-                        # response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
                         start_date = df['START'][i]
                         end_date = datetime.now()
 
