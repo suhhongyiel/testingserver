@@ -270,29 +270,6 @@ def min_by_heartrate(set_time, user_id, directory, header):
     # Sig for top row
     row_sig = 1
 
-def min_by_heartrate(set_time, user_id, directory, header):
-    # 분별 심박수
-    # 만약 데이터가없으면 기본값을 배출하게 됩니다.
-    Heart_rate_min = requests.get(f'https://api.fitbit.com/1/user/-/activities/heart/date/'+set_time+'/1d.json', headers=header).json()
-    # print("pass Heart_rate_min (IF request too many then get error)")
-    # 분별 심박수
-    with open(directory + '/' + user_id + '_분별심박수.csv', 'a', newline='') as file:
-        writer = csv.writer(file)
-        if file.tell() == 0:
-            field = ["user_id", "date","time_min", "value"]
-            writer.writerow(field)
-    # By date
-        if Heart_rate_min['activities-heart-intraday']['dataset'] == []:
-            print("Except Code: Heart rate value in minute are empty")
-            writer.writerow([user_id, Heart_rate_min['activities-heart'][0]['dateTime'], '-1', '-1'])
-        else:
-            for i in Heart_rate_min['activities-heart-intraday']['dataset']: #by daily 
-                writer.writerow([user_id, Heart_rate_min['activities-heart'][0]['dateTime'], i['time'], i['value']])
-
-
-    # Sig for top row
-    row_sig = 1
-
 
 import re
 import pandas as pd

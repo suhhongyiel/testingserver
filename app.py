@@ -425,6 +425,224 @@ def rest_HR(set_time, user_id, header):
     except:
         print("would be Error when you request too much times api in short-times")
 
+# 날짜별로 파악 fitbit_auto.py 실행
+import os
+from datetime import datetime, timedelta
+import re
+import requests
+
+# 버튼 Click 하면 아래 코드가 실행:
+
+# api call from here
+def Activity(set_time, user_id, header):
+    try:
+        # 하루 활동량# 활동량
+        # Step
+        Activity_time_steps = requests.get(f'https://api.fitbit.com/1/user/-/activities/steps/date/'+set_time+'/1d.json', headers=header).json()
+        # floors
+        Activity_time_floors = requests.get(f'https://api.fitbit.com/1/user/-/activities/floors/date/'+set_time+'/1d.json', headers=header).json()
+        # distance
+        Activity_time_distance = requests.get(f'https://api.fitbit.com/1/user/-/activities/distance/date/'+set_time+'/1d.json', headers=header).json()
+        # calories
+        Activity_time_calories = requests.get(f'https://api.fitbit.com/1/user/-/activities/calories/date/'+set_time+'/1d.json', headers=header).json()
+        # print("pass active")
+        print("call data")
+    except:
+        Activity_time_steps = -1
+        Activity_time_floors = -1
+        Activity_time_distance = -1
+        Activity_time_calories = -1
+        print("Activity data is missing on " + set_time)
+        
+    # 하루 기준으로 code generated
+    dateTime = Activity_time_steps['activities-steps'][0]['dateTime']
+    distance = Activity_time_distance['activities-distance'][0]['value']
+    steps = Activity_time_steps['activities-steps'][0]['value']
+    floors = Activity_time_floors['activities-floors'][0]['value']
+    calories = Activity_time_calories['activities-calories'][0]['value']
+    
+    # INSERT 쿼리 작성
+    query = "INSERT INTO " + user_id + "_활동량 " + "(user_id, date, distance, steps, calories, floors) VALUES (%s, %s, %s, %s, %s, %s)"
+
+    # 데이터베이스에 데이터 삽입
+    with db.cursor() as cursor:
+        cursor.execute(query, (user_id, dateTime, distance, steps, calories, floors))
+    print("insert db")
+    db.commit()
+
+def rest_HR(set_time, user_id, header):
+    # 휴식기 심박수
+    try:
+        heart_rate_request = requests.get(f'https://api.fitbit.com/1/user/-/activities/heart/date/'+set_time+'/'+set_time+'.json',
+                                            headers=header).json()
+    except:
+        print("would be 429 Error occur")
+
+    try:
+        for i in heart_rate_request['activities-heart']:
+            try:
+                rh_date = i['dateTime']
+                rh = i['value']['restingHeartRate']
+            except:
+                print("resting heart rate is not detected")
+                rh = -1
+            
+            # INSERT 쿼리 작성
+            query = "INSERT INTO " + user_id + "_휴식기심박수" + "(user_id, date, resting_hr) VALUES (%s, %s, %s)"
+
+            # 데이터베이스에 데이터 삽입
+            with db.cursor() as cursor:
+                cursor.execute(query, (user_id, rh_date, rh))
+            db.commit()
+    except:
+        print("would be Error when you request too much times api in short-times")
+
+def sleep_summary(set_time, user_id, header):
+    # 수면 요약
+    sleep_data = requests.get(f'https://api.fitbit.com/1.2/user/-/sleep/date/'+set_time+'.json', headers=header).json()
+
+    try:
+        sleep_dateTime = sleep_data['sleep'][0]['dateOfSleep']
+    except:
+        print("None Sleep Data, "+set_time+"this day")
+        sleep_dateTime = set_time
+
+    stages_deep = sleep_data['summary']['stages'].get('deep', -1)
+    stages_light = sleep_data['summary']['stages'].get('light', -1)
+    stages_rem = sleep_data['summary']['stages'].get('rem', -1)
+    stages_wake = sleep_data['summary']['stages'].get('wake', -1)
+    efficiency = sleep_data['sleep'][0].get('efficiency', -1)
+    cnt_deep = sleep_data['sleep'][0]['levels']['summary'].get('deep', {}).get('count', -1)
+    cnt_light = sleep_data['sleep'][0]['levels']['summary'].get('light', {}).get('count', -1)
+    cnt_rem = sleep_data['sleep'][0]['levels']['summary'].get('rem', {}).get('count', -1)
+    cnt_wake = sleep_data['sleep'][0]['levels']['summary'].get('wake', {}).get('count', -1)
+    totalMinutesAsleep = sleep_data['summary']['totalMinutesAsleep']
+    totalSleepRecords = sleep_data['summary']['totalSleepRecords']
+    totalTimeInBed = sleep_data['summary']['totalTimeInBed']
+
+    # INSERT 쿼리 작성
+    query = "INSERT INTO " + user_id + "_수면요약 (user_id, date, totalMinutesAsleep, totalSleepRecords, totalTimeInBed, stages_deep, stages_light, stages_rem, stages_wake, efficiency, cnt_deep, cnt_light, cnt_rem, cnt_wake) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+    # 데이터베이스에 데이터 삽입
+    with db.cursor() as cursor:
+        cursor.execute(query, (user_id, sleep_dateTime, totalMinutesAsleep, totalSleepRecords, totalTimeInBed, stages_deep, stages_light, stages_rem, stages_wake, efficiency, cnt_deep, cnt_light, cnt_rem, cnt_wake))
+    db.commit()
+
+def sleep_detail(set_time, user_id, header):
+    # 수면 상세
+    sleep_detail = requests.get(f'https://api.fitbit.com/1.2/user/-/sleep/date/' + set_time + '.json', headers=header).json()
+
+    # INSERT 쿼리 작성
+    query = "INSERT INTO " + user_id + "_수면상세 (user_id, date, time_stamp, sleep_stage, sleep_duration) VALUES (%s, %s, %s, %s, %s)"
+
+    if sleep_detail['sleep'] == []:
+        print("User Warning Code: Sleep data is empty , sent message to wear device")
+        with db.cursor() as cursor:
+            cursor.execute(query, (user_id, set_time, '-1', '-1', '-1'))
+        db.commit()
+    else:
+        for i in sleep_detail['sleep']:
+            for j in i['levels']['data']:
+                # sleep date time stamp
+                sleep_dateTime = j['dateTime']
+                sdTime = sleep_dateTime.split('T')
+
+                sleep_stage = j['level']
+                sleep_duration = j['seconds']
+
+                with db.cursor() as cursor:
+                    cursor.execute(query, (user_id, i['dateOfSleep'], sdTime[1], sleep_stage, sleep_duration))
+                db.commit()
+
+def AZM(set_time, user_id, header):
+    # AZM (분별 활동 interval)
+    activity_zone_minute = requests.get(f'https://api.fitbit.com/1/user/-/activities/active-zone-minutes/date/'+set_time+'/1d.json', headers=header).json()
+
+    # INSERT 쿼리 작성
+    query = "INSERT INTO " + user_id + "_AZM분별활동 (user_id, date, activeZoneMinutes, fatBurnActiveZoneMinutes, cardioActiveZoneMinutes) VALUES (%s, %s, %s, %s, %s)"
+
+    if activity_zone_minute["activities-active-zone-minutes"] == []:
+        print(f"AZM is not detected at {set_time}")
+        with db.cursor() as cursor:
+            cursor.execute(query, (user_id, set_time, 0, 0, 0))
+        db.commit()
+    else:
+        for i in activity_zone_minute['activities-active-zone-minutes']:
+            activeZoneMinutes = i['value'].get('activeZoneMinutes', 0)
+            fatBurnActiveZoneMinutes = i['value'].get('fatBurnActiveZoneMinutes', 0)
+            cardioActiveZoneMinutes = i['value'].get('cardioActiveZoneMinutes', 0)
+
+            with db.cursor() as cursor:
+                cursor.execute(query, (user_id, i['dateTime'], activeZoneMinutes, fatBurnActiveZoneMinutes, cardioActiveZoneMinutes))
+            db.commit()
+
+def HRV_min(set_time, user_id, header):
+    # 분별 HRV
+    HRV_min = requests.get(f'https://api.fitbit.com/1/user/-/hrv/date/'+set_time+'/all.json', headers=header).json()
+
+    # INSERT 쿼리 작성
+    query = "INSERT INTO " + user_id + "_분별HRV (user_id, date, time, rmssd, coverage, hf, lf) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+
+    try:
+        for i in range(len(HRV_min['hrv'][0]['minutes'][0]['minute'])):
+            time_interval = HRV_min['hrv'][0]['minutes'][i]['minute'].split('T')
+            rmssd = HRV_min['hrv'][0]['minutes'][i]['value']['rmssd']
+            coverage = HRV_min['hrv'][0]['minutes'][i]['value']['coverage']
+            hf = HRV_min['hrv'][0]['minutes'][i]['value']['hf']
+            lf = HRV_min['hrv'][0]['minutes'][i]['value']['lf']
+
+            with db.cursor() as cursor:
+                cursor.execute(query, (user_id, time_interval[0], time_interval[1], rmssd, coverage, hf, lf))
+            db.commit()
+    except:
+        none_value = -1
+        with db.cursor() as cursor:
+            cursor.execute(query, (user_id, set_time, none_value, none_value, none_value, none_value))
+        db.commit()
+        print("Patient does not have Deep sleep level")
+
+def min_by_heartrate(set_time, user_id, header):
+    Heart_rate_min = requests.get(f'https://api.fitbit.com/1/user/-/activities/heart/date/'+set_time+'/1d.json', headers=header).json()
+
+    # INSERT 쿼리 작성
+    query = "INSERT INTO " + user_id + "_분별심박수 (user_id, date, time_min, value) VALUES (%s, %s, %s, %s)"
+
+    # By date
+    if not Heart_rate_min['activities-heart-intraday']['dataset']:
+        print("Except Code: Heart rate value in minute are empty")
+        with db.cursor() as cursor:
+            cursor.execute(query, (user_id, Heart_rate_min['activities-heart'][0]['dateTime'], '-1', '-1'))
+        db.commit()
+    else:
+        for i in Heart_rate_min['activities-heart-intraday']['dataset']: #by daily 
+            with db.cursor() as cursor:
+                cursor.execute(query, (user_id, Heart_rate_min['activities-heart'][0]['dateTime'], i['time'], i['value']))
+            db.commit()
+
+# Data dates comparing
+def get_data_for_user(user_id, missing_dates, header):
+    call_count = 0
+
+    for current_date in missing_dates:
+        if call_count >= 14:
+            return False
+        try:
+            time_set = current_date.strftime('%Y-%m-%d')
+            Activity(time_set, user_id, header)
+            rest_HR(time_set, user_id, header)
+            sleep_summary(time_set, user_id, header)
+
+            
+        except Exception as e:
+            error_message = str(e)
+            with open("error_log.txt", "a") as file:  # 'a'는 append 모드를 의미합니다.
+                file.write(error_message + "\n")
+                print("eception involved")
+            
+
+            call_count += 1
+
+    return True
 
 def get_existing_data_dates(user_id):
     
@@ -477,6 +695,11 @@ def get_data_for_user(user_id, missing_dates, header):
             time_set = current_date.strftime('%Y-%m-%d')
             Activity(time_set, user_id, header)
             rest_HR(time_set, user_id, header)
+            sleep_summary(time_set, user_id, header)
+            sleep_detail(time_set, user_id, header)
+            AZM(time_set, user_id, header)
+            HRV_min(time_set, user_id, header)
+            min_by_heartrate(time_set, user_id, header)
 
         except Exception as e:
             error_message = str(e)
