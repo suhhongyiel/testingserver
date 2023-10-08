@@ -361,6 +361,42 @@ from datetime import datetime, timedelta
 import re
 import requests
 
+def Activity(set_time, user_id, header):
+    try:
+        # 하루 활동량# 활동량
+        # Step
+        Activity_time_steps = requests.get(f'https://api.fitbit.com/1/user/-/activities/steps/date/'+set_time+'/1d.json', headers=header).json()
+        # floors
+        Activity_time_floors = requests.get(f'https://api.fitbit.com/1/user/-/activities/floors/date/'+set_time+'/1d.json', headers=header).json()
+        # distance
+        Activity_time_distance = requests.get(f'https://api.fitbit.com/1/user/-/activities/distance/date/'+set_time+'/1d.json', headers=header).json()
+        # calories
+        Activity_time_calories = requests.get(f'https://api.fitbit.com/1/user/-/activities/calories/date/'+set_time+'/1d.json', headers=header).json()
+        # print("pass active")
+        print("call data")
+    except:
+        Activity_time_steps = -1
+        Activity_time_floors = -1
+        Activity_time_distance = -1
+        Activity_time_calories = -1
+        print("Activity data is missing on " + set_time)
+        
+    # 하루 기준으로 code generated
+    dateTime = Activity_time_steps['activities-steps'][0]['dateTime']
+    distance = Activity_time_distance['activities-distance'][0]['value']
+    steps = Activity_time_steps['activities-steps'][0]['value']
+    floors = Activity_time_floors['activities-floors'][0]['value']
+    calories = Activity_time_calories['activities-calories'][0]['value']
+    
+    # INSERT 쿼리 작성
+    query = "INSERT INTO " + user_id + "_활동량 " + "(user_id, date, distance, steps, calories, floors) VALUES (%s, %s, %s, %s, %s, %s)"
+
+    # 데이터베이스에 데이터 삽입
+    with db.cursor() as cursor:
+        cursor.execute(query, (user_id, dateTime, distance, steps, calories, floors))
+    st.write("insert db")
+    db.commit()
+
 def get_existing_data_dates(user_id):
     
     table_name = f"{user_id}"
@@ -370,7 +406,6 @@ def get_existing_data_dates(user_id):
     # st.write(smcfb_info)
     smc_info = get_table_data(uid_table_name)
     return smc_info['date'].tolist()
-
 
 def get_missing_dates(user_id, start_date, end_date):
     existing_dates = get_existing_data_dates(user_id)
@@ -403,23 +438,36 @@ def get_missing_dates(user_id, start_date, end_date):
 
     return missing_dates
 
+def get_data_for_user(user_id, missing_dates, header):
+    call_count = 0
+
+    for current_date in missing_dates:
+        if call_count >= 14:
+            return False
+        try:
+            time_set = current_date.strftime('%Y-%m-%d')
+            Activity(time_set, user_id, header)
+
+        except Exception as e:
+            error_message = str(e)
+            with open("error_log.txt", "a") as file:  # 'a'는 append 모드를 의미합니다.
+                file.write(error_message + "\n")
+                print("eception involved")
+            
+
+            call_count += 1
+
+    return True
+
 def api_call():
     # 날짜별로 파악 fitbit_auto.py 실행
     # 버튼 Click 하면 아래 코드가 실행:
     if st.button('Click to Execute'):
-
-        # Add content for the about page
         with db.cursor() as cursor:
             cursor.execute("SELECT * FROM device_info_temp")
             device_info_options = cursor.fetchall()
             columns = [desc[0] for desc in cursor.description]  # 컬럼 이름 가져오기
             df = pd.DataFrame(device_info_options, columns=columns)
-
-
-        
-
-        print(pd.isnull(df['ACCESS_TOKEN'][0]))
-        results = []
 
         for i in range(len(df)):
             if not pd.isnull(df['ACCESS_TOKEN'][i]):
@@ -434,13 +482,12 @@ def api_call():
 
                         missing_dates = get_missing_dates(user_id, start_date, end_date)
 
-
-
                         # Data api call From here
                         header = {'Authorization': 'Bearer {}'.format(access_token)}
                         response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
-                        st.write(response)
-
+                        st.write("start call data")
+                        if not get_data_for_user(user_id, missing_dates, header):
+                            st.write(f"Reached API call limit for user: {user_id}. Skipping to the next user.")
 
 db = pymysql.connect(host='119.67.109.156', 
                         port=3306,
@@ -448,13 +495,6 @@ db = pymysql.connect(host='119.67.109.156',
                         password='Korea2022!', 
                         db='project_wd', 
                         charset='utf8')
-
-
-
-
-
-
-
 
 # Usage example
 def main():
