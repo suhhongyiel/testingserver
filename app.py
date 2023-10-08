@@ -260,7 +260,8 @@ def page_about():
     if st.button("Run fitbit_auto.py"):
         subprocess.run(["python", "fitbit_auto.py"])
         st.success("fitbit_auto.py executed!")
-
+def page_download():
+    st.write("download")
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
     table_names = []
@@ -304,8 +305,8 @@ db = pymysql.connect(host='119.67.109.156',
 # Usage example
 def main():
     pages = {
-        # "기기정보추가": page_home,
-        "환자데이터베이스": page_about
+        "환자데이터베이스": page_about,
+        "전체 plot download": page_download
     }
 
 
