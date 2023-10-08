@@ -47,6 +47,9 @@ def shade_negative_one_data(ax, data_df, data):
             if next_date:
                 start = next_date
 
+
+
+
 def convert_date(date_str):
     if not isinstance(date_str, str):
         return date_str
@@ -80,7 +83,11 @@ def extract_range_data(uid_table, uid, smcfb_info):
 
     return df, min_date, max_date
 
-
+def shade_negatives_and_zeros(ax, data_series, time_series):
+    is_negative_or_zero = (data_series == -1) | (data_series == 0)
+    for start, end in zip(time_series[is_negative_or_zero & ~is_negative_or_zero.shift(fill_value=False)], 
+                        time_series[is_negative_or_zero & ~is_negative_or_zero.shift(-1, fill_value=False)]):
+        ax.axvspan(start, end, color='grey', alpha=0.5)
 
 
 # Test the function
@@ -149,7 +156,49 @@ def plot_activity(df, min_date, max_date):
     plt.tight_layout()
     return fig
 
+def plot_sleeping(df, min_date, max_date):
+# extract directory    
 
+    time_series = df['date']
+
+    fig, axes = plt.subplots(4, 1, figsize=(14, 18), sharex=True)
+    data_sorted = df.sort_values(by='date')
+    plt.suptitle(f"{data_sorted['user_id'][0]}", fontsize=16)  # Assuming file_name is something like "name.csv"
+    # Main sleep data plot
+    axes[0].plot(time_series, df['totalMinutesAsleep'], '-o', label='Total Minutes Asleep', color='blue')
+    axes[0].plot(time_series, df['totalTimeInBed'], '-o', label='Total Time in Bed', color='orange')
+    shade_negatives_and_zeros(axes[0], df['totalMinutesAsleep'], time_series)
+    axes[0].legend()
+    axes[0].set_title("Main Sleep Data")
+
+    # Sleep stages stacked bar chart
+    axes[1].bar(time_series, df['stages_deep'], label='Deep Sleep', color='darkblue')
+    axes[1].bar(time_series, df['stages_light'], label='Light Sleep', color='lightblue', bottom=df['stages_deep'])
+    axes[1].bar(time_series, df['stages_rem'], label='REM Sleep', color='green', 
+        bottom=df['stages_deep'] + df['stages_light'])
+    axes[1].bar(time_series, df['stages_wake'], label='Awake Time', color='red', 
+        bottom=df['stages_deep'] + df['stages_light'] + df['stages_rem'])
+    axes[1].legend()
+    axes[1].set_title("Sleep Stages")
+
+    # Efficiency plot
+    axes[2].plot(time_series, df['efficiency'], '-o', color='darkcyan', label='Sleep Efficiency')
+    shade_negatives_and_zeros(axes[2], df['efficiency'], time_series)
+    axes[2].legend()
+    axes[2].set_title("Sleep Efficiency")
+
+    # Total sleep records plot
+    axes[3].bar(time_series, df['totalSleepRecords'], color='darkgreen', label='Sleep Records')
+    shade_negatives_and_zeros(axes[3], df['totalSleepRecords'], time_series)
+    axes[3].legend()
+    axes[3].set_title("Total Sleep Records")
+
+    # Adjusting the x-ticks for better visibility
+    for ax in axes:
+        ax.tick_params(axis='x', rotation=45)
+
+    plt.tight_layout()
+    return fig
 
 
 # 두번째 페이지
@@ -193,7 +242,9 @@ def page_about():
         st.write("gg2")
 
     elif smcfb_info in table_name + "_수면상세":
-        st.write("gg3")
+        df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
+        p3 = plot_sleeping(df, min_date, max_date)
+        st.pyplot(p3)
 
     elif smcfb_info in table_name + "_수면요약":
         st.write("gg4")
@@ -256,6 +307,9 @@ def main():
         # "기기정보추가": page_home,
         "환자데이터베이스": page_about
     }
+
+
+    # 두번째 페이지에는 전체적으로 plot 하는 것을 보여주고 pdf 다운로드를 진행해볼예정
     
     st.sidebar.title("페이지이동")
     selection = st.sidebar.radio("Go to", list(pages.keys()))
