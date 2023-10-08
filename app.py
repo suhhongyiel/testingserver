@@ -257,6 +257,23 @@ def page_about():
         st.success("fitbit_auto.py executed!")
 
 import io
+from fpdf import FPDF
+
+def save_plots_to_pdf_buffer(figs):
+    pdf = FPDF()
+    
+    for fig in figs:
+        img_stream = io.BytesIO()
+        fig.savefig(img_stream, format="png")
+        img_stream.seek(0)
+
+        pdf.add_page()
+        pdf.image(img_stream, x = 10, y = 20, w = 190)
+    
+    buffer = io.BytesIO()
+    pdf.output(buffer, "F")
+    buffer.seek(0)
+    return buffer
 
 def page_download():
     st.write("download")
@@ -303,11 +320,8 @@ def page_download():
 
 
     figs = [psleep, pact, p1]
-
-    # Create an in-memory buffer
-    buffer = io.BytesIO()
-    figs.write_image(file=buffer, format="pdf")
-    # Download the pdf from the buffer
+    
+    buffer = save_plots_to_pdf_buffer(figs)
     st.download_button(
         label="Download PDF",
         data=buffer,
