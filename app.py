@@ -242,12 +242,12 @@ def page_about():
         st.write("gg2")
 
     elif smcfb_info in table_name + "_수면상세":
+        st.write("gg3")
+
+    elif smcfb_info in table_name + "_수면요약":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
         p3 = plot_sleeping(df, min_date, max_date)
         st.pyplot(p3)
-
-    elif smcfb_info in table_name + "_수면요약":
-        st.write("gg4")
 
     elif smcfb_info in table_name + "_활동량":
         st.write("gg5")
