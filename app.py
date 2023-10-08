@@ -29,8 +29,6 @@ def shade_zero_data(ax, data_df, data):
             if next_date:
                 start = next_date
 
-
-
 def shade_negative_one_data(ax, data_df, data):
     is_negative_one = data_df == -1
     negative_one_dates = data[is_negative_one]['date'].tolist()
@@ -46,9 +44,6 @@ def shade_negative_one_data(ax, data_df, data):
             ax.axvspan(start, current_date, color='grey', alpha=0.5)
             if next_date:
                 start = next_date
-
-
-
 
 def convert_date(date_str):
     if not isinstance(date_str, str):
@@ -88,7 +83,6 @@ def shade_negatives_and_zeros(ax, data_series, time_series):
     for start, end in zip(time_series[is_negative_or_zero & ~is_negative_or_zero.shift(fill_value=False)], 
                         time_series[is_negative_or_zero & ~is_negative_or_zero.shift(-1, fill_value=False)]):
         ax.axvspan(start, end, color='grey', alpha=0.5)
-
 
 # Test the function
 # extract_range_data(["file1.csv", "file2.csv", ...], "sample_uid", [start_date, end_date])
@@ -201,7 +195,7 @@ def plot_sleeping(df, min_date, max_date):
     return fig
 
 
-# 두번째 페이지
+# 페이지
 def page_about():
     st.title("DataBase")
     # Add content for the about page
@@ -262,6 +256,27 @@ def page_about():
         st.success("fitbit_auto.py executed!")
 def page_download():
     st.write("download")
+    # 선택 하면 전체 plot 출력
+    st.title("DataBase")
+    # Add content for the about page
+    with db.cursor() as cursor:
+        cursor.execute("SELECT study_ID FROM device_info_temp")
+        device_info_options = [row[0] for row in cursor.fetchall()]
+
+    device_info = st.selectbox("SELECT Device Info", device_info_options)
+    st.write("This is ")
+
+    st.write(device_info)
+
+    table_name = f"{device_info}"
+    st.info(f"Selected Device Info: {device_info}")
+    st.info(f"Table Name: {table_name}")
+    all_name = get_table_names(table_name)
+
+    st.write(all_name)
+
+
+
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
     table_names = []
