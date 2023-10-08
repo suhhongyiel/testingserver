@@ -315,9 +315,6 @@ def page_download():
         mime="application/pdf",
     )
 
-    st.plotly_chart(figs)
-
-
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
     table_names = []
