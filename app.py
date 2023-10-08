@@ -571,13 +571,13 @@ def HRV_min(set_time, user_id, header):
         for i in range(len(HRV_min['hrv'][0]['minutes'][0]['minute'])):
             try:
                 time_interval = HRV_min['hrv'][0]['minutes'][i]['minute'].split('T')
-
+                with db.cursor() as cursor:
+                    cursor.execute(query, (user_id, time_interval[0], time_interval[1], HRV_min['hrv'][0]['minutes'][i]['value']['rmssd'], HRV_min['hrv'][0]['minutes'][i]['value']['coverage'], HRV_min['hrv'][0]['minutes'][i]['value']['hf'], HRV_min['hrv'][0]['minutes'][i]['value']['lf']))
+                db.commit()
             except:
                 print("Error")
 
-            with db.cursor() as cursor:
-                cursor.execute(query, (user_id, time_interval[0], time_interval[1], HRV_min['hrv'][0]['minutes'][i]['value']['rmssd'], HRV_min['hrv'][0]['minutes'][i]['value']['coverage'], HRV_min['hrv'][0]['minutes'][i]['value']['hf'], HRV_min['hrv'][0]['minutes'][i]['value']['lf']))
-            db.commit()
+
     except:
         none_value = -1
         with db.cursor() as cursor:
