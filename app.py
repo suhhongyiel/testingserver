@@ -286,7 +286,7 @@ def page_download():
     Activity_data = get_table_data(all_name[5])
     df5, min_date5, max_date5 = extract_range_data(Activity_data, device_info, all_name[5])
     pact = plot_activity(df5, min_date5, max_date5)
-    st.pyploy(pact)
+    st.pyplot(pact)
 
     resting_heart_data = get_table_data(all_name[6])
     df6, min_date6, max_date6 = extract_range_data(resting_heart_data, device_info, all_name[6])
