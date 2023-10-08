@@ -286,7 +286,7 @@ def page_download():
     # AZM_data = get_table_data(all_name[4])
     # df, min_date, max_date = extract_range_data(AZM_data, device_info, all_name[4])
 
-    resting_heart_data = get_table_data(all_name[5])
+    resting_heart_data = get_table_data(all_name[6])
     df5, min_date5, max_date5 = extract_range_data(resting_heart_data, device_info, all_name[5])
     p1 = plot_resting(df5, min_date5, max_date5)
     st.pyplot(p1)
