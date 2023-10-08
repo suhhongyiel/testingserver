@@ -652,13 +652,13 @@ def get_data_for_user(user_id, missing_dates, header):
             return False
         try:
             time_set = current_date.strftime('%Y-%m-%d')
-            # Activity(time_set, user_id, header)
-            # sleep_summary(time_set, user_id, header)
-            # sleep_detail(time_set, user_id, header)
-            # AZM(time_set, user_id, header)
+            Activity(time_set, user_id, header)
+            sleep_summary(time_set, user_id, header)
+            sleep_detail(time_set, user_id, header)
+            AZM(time_set, user_id, header)
             HRV_min(time_set, user_id, header)
-            # min_by_heartrate(time_set, user_id, header)
-            # rest_HR(time_set, user_id, header)
+            min_by_heartrate(time_set, user_id, header)
+            rest_HR(time_set, user_id, header)
 
 
         except Exception as e:
@@ -693,7 +693,7 @@ def api_call():
         for idx, row in df.iterrows():
             if not pd.isnull(row['ACCESS_TOKEN']) and not pd.isnull(row['START']):
                 user_id = row['study_ID']
-                if user_id == "smcfb_01_001":
+                if user_id != "smcfb_01_001" or user_id != "scmfb_01_087":
                     access_token = row['ACCESS_TOKEN']
                     start_date = row['START']
                     end_date = datetime.now()
