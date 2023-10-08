@@ -619,31 +619,6 @@ def min_by_heartrate(set_time, user_id, header):
                 cursor.execute(query, (user_id, Heart_rate_min['activities-heart'][0]['dateTime'], i['time'], i['value']))
             db.commit()
 
-# Data dates comparing
-def get_data_for_user(user_id, missing_dates, header):
-    call_count = 0
-
-    for current_date in missing_dates:
-        if call_count >= 14:
-            return False
-        try:
-            time_set = current_date.strftime('%Y-%m-%d')
-            Activity(time_set, user_id, header)
-            rest_HR(time_set, user_id, header)
-            sleep_summary(time_set, user_id, header)
-
-            
-        except Exception as e:
-            error_message = str(e)
-            with open("error_log.txt", "a") as file:  # 'a'는 append 모드를 의미합니다.
-                file.write(error_message + "\n")
-                print("eception involved")
-            
-
-            call_count += 1
-
-    return True
-
 def get_existing_data_dates(user_id):
     
     table_name = f"{user_id}"
@@ -694,12 +669,13 @@ def get_data_for_user(user_id, missing_dates, header):
         try:
             time_set = current_date.strftime('%Y-%m-%d')
             Activity(time_set, user_id, header)
+            rest_HR(time_set, user_id, header)
             sleep_summary(time_set, user_id, header)
             sleep_detail(time_set, user_id, header)
             AZM(time_set, user_id, header)
             HRV_min(time_set, user_id, header)
             min_by_heartrate(time_set, user_id, header)
-            rest_HR(time_set, user_id, header)
+            
 
         except Exception as e:
             error_message = str(e)
