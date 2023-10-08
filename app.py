@@ -473,7 +473,7 @@ def api_call():
             if not pd.isnull(df['ACCESS_TOKEN'][i]):
                 if not pd.isnull(df['START'][i]):
                     user_id = df.study_ID[i]
-                    if user_id == "smcfb_01_001":
+                    if user_id == "smcfb_01_002":
                         access_token = df.ACCESS_TOKEN[i]
                         # header = {'Authorization': 'Bearer {}'.format(access_token)}
                         # response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
