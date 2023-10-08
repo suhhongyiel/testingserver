@@ -11,6 +11,7 @@ import matplotlib.dates as mdates
 import numpy as np
 from dateutil import parser
 from datetime import datetime
+from fpdf import FPDF
 
 
 def shade_zero_data(ax, data_df, data):
@@ -254,6 +255,25 @@ def page_about():
     if st.button("Run fitbit_auto.py"):
         subprocess.run(["python", "fitbit_auto.py"])
         st.success("fitbit_auto.py executed!")
+
+import io
+
+def save_plots_to_pdf(figs):
+    pdf = FPDF()
+    
+    for fig in figs:
+        img_stream = io.BytesIO()
+        fig.savefig(img_stream, format="png")
+        img_stream.seek(0)
+
+        pdf.add_page()
+        pdf.image(img_stream, x = 10, y = 20, w = 190)
+    
+    filename = "multiplot_output.pdf"
+    pdf.output(filename)
+    return filename
+
+
 def page_download():
     st.write("download")
     # 선택 하면 전체 plot 출력
@@ -273,6 +293,8 @@ def page_download():
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names(table_name)
 
+
+
     st.write(all_name)
     # AZM_data = get_table_data(all_name[0])
     # df, min_date, max_date = extract_range_data(AZM_data, device_info, all_name[0])
@@ -284,7 +306,7 @@ def page_download():
     df4, min_date4, max_date4 = extract_range_data(Sleep_data, device_info, all_name[4])
     psleep = plot_sleeping(df4, min_date4, max_date4)
     st.pyplot(psleep)
-    
+
     Activity_data = get_table_data(all_name[5])
     df5, min_date5, max_date5 = extract_range_data(Activity_data, device_info, all_name[5])
     pact = plot_activity(df5, min_date5, max_date5)
@@ -294,6 +316,19 @@ def page_download():
     df6, min_date6, max_date6 = extract_range_data(resting_heart_data, device_info, all_name[6])
     p1 = plot_resting(df6, min_date6, max_date6)
     st.pyplot(p1)
+
+
+    figs = [psleep, pact, p1]
+
+    if st.button("Plot들을 PDF로 다운로드"):
+        filename = save_plots_to_pdf(figs)
+        with open(filename, "rb") as f:
+            st.download_button(
+                label="PDF 다운로드",
+                data=f,
+                file_name="multiplot_output.pdf",
+                mime="application/pdf"
+            )
 
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
