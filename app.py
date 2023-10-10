@@ -251,7 +251,7 @@ def page_about():
         st.write("GG6")
 
     # api call
-    api_call()
+    # api_call()
 
 import io
 from fpdf import FPDF
@@ -402,6 +402,7 @@ def Activity(set_time, user_id, header):
     print("insert db")
     db.commit()
 
+# 이새기 작동을 안함 시발
 def rest_HR(set_time, user_id, header):
     # 휴식기 심박수
     try:
