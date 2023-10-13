@@ -673,47 +673,6 @@ def get_data_for_user(user_id, missing_dates, header):
 
     return True
 
-# def api_call():
-#     # 날짜별로 파악 fitbit_auto.py 실행
-#     # 버튼 Click 하면 아래 코드가 실행:
-#     if st.button('Click to Execute'):
-#         with db.cursor() as cursor:
-#             cursor.execute("SELECT * FROM device_info_temp")
-#             device_info_options = cursor.fetchall()
-#             columns = [desc[0] for desc in cursor.description]  # 컬럼 이름 가져오기
-#             df = pd.DataFrame(device_info_options, columns=columns)
-
-#         st.write(df)
-        
-#         # 진행바 및 메시지 초기화
-#         progress_bar = st.progress(0)
-#         status_message = st.empty()
-
-#         total_users = len(df)
-        
-#         for idx, row in df.iterrows():
-#             if not pd.isnull(row['ACCESS_TOKEN']) and not pd.isnull(row['START']):
-#                 user_id = row['study_ID']
-#                 if user_id != "smcfb_01_001" or user_id != "scmfb_01_087":
-#                     access_token = row['ACCESS_TOKEN']
-#                     start_date = row['START']
-#                     end_date = datetime.now()
-
-#                     missing_dates = get_missing_dates(user_id, start_date, end_date)
-
-#                     # Data api call From here
-#                     header = {'Authorization': 'Bearer {}'.format(access_token)}
-#                     response = requests.get("https://api.fitbit.com/1/user/-/profile.json", headers=header).json()
-#                     status_message.text(f"Processing data for user: {user_id}")
-#                     if not get_data_for_user(user_id, missing_dates, header):
-#                         st.write(f"Reached API call limit for user: {user_id}. Skipping to the next user.")
-            
-#             # 진행바 업데이트
-#             progress = int((idx + 1) / total_users * 100)
-#             progress_bar.progress(progress)
-        
-#         status_message.text("Processing completed!")
-
 db = pymysql.connect(host='119.67.109.156', 
                         port=3306,
                         user='root', 
