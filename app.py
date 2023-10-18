@@ -278,7 +278,7 @@ def page_download():
     st.title("DataBase")
     # Add content for the about page
     with db.cursor() as cursor:
-        cursor.execute("SELECT study_ID FROM device_info_temp")
+        cursor.execute("SELECT study_ID FROM device_info_main")
         device_info_options = [row[0] for row in cursor.fetchall()]
 
     device_info = st.selectbox("SELECT Device Info", device_info_options)
