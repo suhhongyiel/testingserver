@@ -142,7 +142,7 @@ def HRV_min(set_time, user_id, directory,header ):
                     print("Error")
         except:
             none_value = -1
-            writer.writerow([user_id, set_time, none_value, none_value, none_value, none_value])
+            writer.writerow([user_id, set_time, none_value, none_value, none_value, none_value, none_value])
             print("Patient does not have Deep sleep level")
 
 
