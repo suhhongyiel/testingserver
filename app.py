@@ -279,11 +279,7 @@ def page_download():
     with db.cursor() as cursor:
         cursor.execute("SELECT study_ID FROM device_info_main")
         device_info_options = [row[0] for row in cursor.fetchall()]
-    st.write("here: ", device_info_options)
     device_info = st.selectbox("SELECT Device Info", device_info_options)
-    st.write("This is ")
-
-    st.write(device_info)
 
     table_name = f"{device_info}"
     st.info(f"Selected Device Info: {device_info}")
@@ -334,9 +330,9 @@ def get_table_names(table_name):
     st.write("here is table name: ", table_name)
     try:
         with db.cursor() as cursor:
-
             query = "SHOW TABLES LIKE %s"
-            cursor.execute(query, (f"%{table_name}%"))
+            like_pattern = f"%{table_name}%"  # LIKE 패턴 생성
+            cursor.execute(query, (like_pattern,))  # 쿼리 실행
             result = cursor.fetchall()
             for row in result:
                 table_names.append(row[0])
@@ -344,7 +340,7 @@ def get_table_names(table_name):
             st.write("this is table names: ", result)
 
     except pymysql.Error as e:
-        print(f"An error occurred: {e}")
+        st.error(f"An error occurred: {e}")  # Streamlit 에러 메시지 출력
 
     return table_names
 
