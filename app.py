@@ -205,21 +205,16 @@ def page_about():
         device_info_options = [row[0] for row in cursor.fetchall()]
 
     device_info = st.selectbox("SELECT Device Info", device_info_options)
-    st.write("This is ")
-
-    st.write(device_info)
 
     table_name = f"{device_info}"
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names(table_name)
     
-    st.write("this is all info: ", all_name)
-
     smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
     # st.write(smcfb_info)
     smc_info = get_table_data(smcfb_info)
-    st.write(smc_info)
+    # st.write(smc_info)
 
     if smcfb_info in table_name + "_휴식기심박수":
         df, min_date, max_date = extract_range_data(smc_info, device_info, smcfb_info)
@@ -327,19 +322,19 @@ def page_download():
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
     table_names = []
-    st.write("here is table name: ", table_name)
+    # st.write("here is table name: ", table_name)
     table_name = table_name.replace('.', '_')
     try:
         with db.cursor() as cursor:
             query = "SHOW TABLES LIKE %s"
             like_pattern = f"%{table_name}%"  # LIKE 패턴 생성
-            st.write("Executing query: ", query % like_pattern)  # 쿼리 로그 출력
+            # st.write("Executing query: ", query % like_pattern)  # 쿼리 로그 출력
             cursor.execute(query, (like_pattern,))
             result = cursor.fetchall()
             for row in result:
                 table_names.append(row[0])
 
-            st.write("this is table names: ", result)
+            # st.write("this is table names: ", result)
 
     except pymysql.Error as e:
         st.error(f"An error occurred: {e}")  # Streamlit 에러 메시지 출력
@@ -349,7 +344,6 @@ def get_table_names(table_name):
 # dbeaver 에서 해당하는 데이터 Columns 가져오기
 def get_table_data(smcfb_info):
     data = []
-    st.write("aaaaaaaaaaaaaaaaaa: ", smcfb_info)
     try:
         with db.cursor() as cursor:
             # Execute the query to retrieve the data from the table
