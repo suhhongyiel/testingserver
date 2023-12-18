@@ -350,6 +350,7 @@ def get_table_names(table_name):
 # dbeaver 에서 해당하는 데이터 Columns 가져오기
 def get_table_data(smcfb_info):
     data = []
+    st.write("aaaaaaaaaaaaaaaaaa: ", smcfb_info)
     try:
         with db.cursor() as cursor:
             # Execute the query to retrieve the data from the table
