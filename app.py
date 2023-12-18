@@ -330,6 +330,7 @@ def page_download():
 # dbeaver 에서 해당되는 데이터 테이블 가져오기
 def get_table_names(table_name):
     table_names = []
+    st.write("here is table name: ", table_name)
     try:
         with db.cursor() as cursor:
 
