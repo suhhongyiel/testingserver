@@ -330,6 +330,14 @@ def get_table_names(table_name):
     st.write("here is table name: ", table_name)
     try:
         with db.cursor() as cursor:
+            query = "SHOW TABLES"
+            cursor.execute(query)
+            result = cursor.fetchall()
+            table_names = [row[0] for row in result]
+
+            st.write("Here is all tables: ", table_name)
+
+        with db.cursor() as cursor:
             query = "SHOW TABLES LIKE %s"
             like_pattern = f"%{table_name}%"  # LIKE 패턴 생성
             st.write("Executing query: ", query % like_pattern)  # 쿼리 로그 출력
