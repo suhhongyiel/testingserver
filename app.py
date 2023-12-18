@@ -287,9 +287,12 @@ def page_download():
     table_name = f"{device_info}"
     st.info(f"Selected Device Info: {device_info}")
     st.info(f"Table Name: {table_name}")
+
+    st.write("this is table name: ", table_name)
+
     all_name = get_table_names(table_name)
 
-
+    st.write("this is all name: ", all_name)
 
     st.write(all_name)
     # AZM_data = get_table_data(all_name[0])
