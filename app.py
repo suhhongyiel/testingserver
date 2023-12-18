@@ -337,7 +337,7 @@ def get_table_names(table_name):
             for row in result:
                 table_names.append(row[0])
 
-            st.write("this is table names: ", result)
+            st.write("this is table names: ", table_names)
 
     except pymysql.Error as e:
         st.error(f"An error occurred: {e}")  # Streamlit 에러 메시지 출력
