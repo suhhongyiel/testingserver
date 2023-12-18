@@ -338,6 +338,7 @@ def get_table_names(table_name):
             for row in result:
                 table_names.append(row[0])
 
+            st.write(row)
             st.write("this is table names: ", result)
 
     except pymysql.Error as e:
