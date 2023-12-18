@@ -329,12 +329,6 @@ def get_table_names(table_name):
     table_names = []
     st.write("here is table name: ", table_name)
     try:
-        db = pymysql.connect(host='119.67.109.156', 
-                                port=3306,
-                                user='root', 
-                                password='Korea2022!', 
-                                db='project_wd', 
-                                charset='utf8')
         with db.cursor() as cursor:
             query = "SHOW TABLES LIKE %s"
             like_pattern = f"%{table_name}%"  # LIKE 패턴 생성
