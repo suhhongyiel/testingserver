@@ -214,6 +214,7 @@ def page_about():
     st.info(f"Table Name: {table_name}")
     all_name = get_table_names(table_name)
     
+    st.write("this is all info: ", all_name)
 
     smcfb_info = st.selectbox("SELECT SMCFB Info", all_name)
     # st.write(smcfb_info)
