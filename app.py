@@ -336,7 +336,7 @@ def get_table_names(table_name):
         with db.cursor() as cursor:
 
             query = "SHOW TABLES LIKE %s"
-            cursor.execute(query, (f"%{table_name}%",))
+            cursor.execute(query, (f"%{table_name}%"))
             result = cursor.fetchall()
             for row in result:
                 table_names.append(row[0])
