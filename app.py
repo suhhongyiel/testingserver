@@ -279,7 +279,7 @@ def page_download():
     with db.cursor() as cursor:
         cursor.execute("SELECT study_ID FROM device_info_main")
         device_info_options = [row[0] for row in cursor.fetchall()]
-
+    st.write("here: ", device_info_options)
     device_info = st.selectbox("SELECT Device Info", device_info_options)
     st.write("This is ")
 
