@@ -332,12 +332,13 @@ def get_table_names(table_name):
         with db.cursor() as cursor:
             query = "SHOW TABLES LIKE %s"
             like_pattern = f"%{table_name}%"  # LIKE 패턴 생성
-            cursor.execute(query, (like_pattern,))  # 쿼리 실행
+            st.write("Executing query: ", query % like_pattern)  # 쿼리 로그 출력
+            cursor.execute(query, (like_pattern,))
             result = cursor.fetchall()
             for row in result:
                 table_names.append(row[0])
 
-            st.write("this is table names: ", table_names)
+            st.write("this is table names: ", result)
 
     except pymysql.Error as e:
         st.error(f"An error occurred: {e}")  # Streamlit 에러 메시지 출력
