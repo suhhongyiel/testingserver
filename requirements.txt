@@ -1,0 +1,7 @@
+numpy
+matplotlib
+pymysql
+pandas
+fpdf2
+requests
+datetime
