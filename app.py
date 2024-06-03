@@ -210,10 +210,14 @@ def heart_rate_plot(ax, id, start_date, end_date):
     # Filter for the last 21 days
     max_date = df_filtered['date'].max()
     min_date = max_date - timedelta(days=20)  # Last 21 days
+
     df_last_21_days = df_filtered[(df_filtered['date'] >= min_date) & (df_filtered['date'] <= max_date)]
+    print("df_last_21_days: ", df_last_21_days)
+
 
     # Compute mean and quartiles
     mean_data = df_last_21_days.groupby(df_last_21_days['date'].dt.date)['value'].mean()
+    print("mean_data: ", mean_data)
     quartile_data = df_last_21_days.groupby(df_last_21_days['date'].dt.date)['value'].quantile([0.25, 0.75]).unstack()
 
     # Smooth the data with a rolling window
