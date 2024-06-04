@@ -213,13 +213,12 @@ def plot_activity(ax, id, start_date, end_date):
         WHERE date BETWEEN STR_TO_DATE('{start_date}', '%Y-%m-%d') AND STR_TO_DATE('{end_date}', '%Y-%m-%d')
         """
 
-        
+        st.write(id)
 
         # query_activity = f"""
         # SELECT * FROM {table_activity}
         # WHERE date BETWEEN '{start_date}' AND '{end_date}'
         # """
-        print("??")
         df = pd.read_sql(query_activity, engine)
         st.write(df)
         if not validate_dataframe(df, ['date', 'steps']):
