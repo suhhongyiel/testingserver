@@ -202,23 +202,23 @@ def plot_activity(ax, id, start_date, end_date):
         # 데이터를 읽어올때 해당 데이터가 mm/dd/yyyy 형식이면 해당을 yyyy-mm-dd 형식으로 변환 필요함
         
 
-        query_activity = f"""
-        SELECT
-            CASE
-                WHEN CHAR_LENGTH(date) = 10 THEN STR_TO_DATE(date, '%m/%d/%Y')
-                ELSE STR_TO_DATE(date, '%Y-%m-%d')
-            END as date,
-            steps
-        FROM {table_activity}
-        WHERE date BETWEEN STR_TO_DATE('{start_date}', '%Y-%m-%d') AND STR_TO_DATE('{end_date}', '%Y-%m-%d')
-        """
+        # query_activity = f"""
+        # SELECT
+        #     CASE
+        #         WHEN CHAR_LENGTH(date) = 10 THEN STR_TO_DATE(date, '%m/%d/%Y')
+        #         ELSE STR_TO_DATE(date, '%Y-%m-%d')
+        #     END as date,
+        #     steps
+        # FROM {table_activity}
+        # WHERE date BETWEEN STR_TO_DATE('{start_date}', '%Y-%m-%d') AND STR_TO_DATE('{end_date}', '%Y-%m-%d')
+        # """
 
         st.write(id)
 
-        # query_activity = f"""
-        # SELECT * FROM {table_activity}
-        # WHERE date BETWEEN '{start_date}' AND '{end_date}'
-        # """
+        query_activity = f"""
+        SELECT * FROM {table_activity}
+        WHERE date BETWEEN '{start_date}' AND '{end_date}'
+        """
         df = pd.read_sql(query_activity, engine)
         st.write(df)
         if not validate_dataframe(df, ['date', 'steps']):
