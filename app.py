@@ -199,7 +199,9 @@ def plot_activity(ax, id, start_date, end_date):
         corrected_id = id.replace('.', '_')
         table_activity = f'{corrected_id}_활동량'
 
-        # 데이터를 읽어올때 해당 데이터가 mm/dd/yyyy 형식이면 해당을 yyyy-mm-dd 형식으로 변환
+        # 데이터를 읽어올때 해당 데이터가 mm/dd/yyyy 형식이면 해당을 yyyy-mm-dd 형식으로 변환 필요함
+        
+
         query_activity = f"""
         SELECT
             CASE
@@ -210,13 +212,20 @@ def plot_activity(ax, id, start_date, end_date):
         FROM {table_activity}
         WHERE date BETWEEN STR_TO_DATE('{start_date}', '%Y-%m-%d') AND STR_TO_DATE('{end_date}', '%Y-%m-%d')
         """
-        df = pd.read_sql(query_activity, engine)
 
+        
+
+        # query_activity = f"""
+        # SELECT * FROM {table_activity}
+        # WHERE date BETWEEN '{start_date}' AND '{end_date}'
+        # """
+
+        df = pd.read_sql(query_activity, engine)
+        st.write(df)
         if not validate_dataframe(df, ['date', 'steps']):
             return None, None, None
 
         df = df[df['date'] != '-1']
-        
         df['date'] = pd.to_datetime(df['date'], errors='coerce')
         df = df.dropna(subset=['date'])
 
