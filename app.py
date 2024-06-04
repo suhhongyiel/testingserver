@@ -430,6 +430,9 @@ def page_about():
     start_date = st.sidebar.date_input("Start Date", None)
     last_date = st.sidebar.date_input("Last Date", None)
 
+    st.write("start_date: ", start_date)
+    st.write("last_date: ", last_date)
+
     if start_date and last_date:
         start_date = datetime.combine(start_date, datetime.min.time())
         last_date = datetime.combine(last_date, datetime.min.time())
