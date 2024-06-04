@@ -318,18 +318,18 @@ def sleep_graph_ver(ax, id, start_date, end_date, nan_value_df):
         corrected_all_minutes_df = pd.DataFrame(corrected_all_minutes, columns=['DateTime'])
 
         corrected_full_sleep_data = pd.merge(corrected_all_minutes_df, sleep_minutes_df, on='DateTime', how='left')
-        nan_value_df.to_csv('./nana.csv')
+        # nan_value_df.to_csv('./nana.csv')
         corrected_full_sleep_data['SleepStage'].fillna(0, inplace=True)
         corrected_sleep_data_cleaned = corrected_full_sleep_data.copy()
         corrected_sleep_data_cleaned.loc[:, 'time_min'] = corrected_sleep_data_cleaned['DateTime'].dt.strftime('%H:%M:%S')
         corrected_sleep_data_cleaned.loc[:, 'date'] = corrected_sleep_data_cleaned['DateTime'].dt.strftime('%m/%d/%Y')
-        corrected_sleep_data_cleaned.to_csv('./sleep_.csv')
+        # corrected_sleep_data_cleaned.to_csv('./sleep_.csv')
 
         merged_data = pd.merge(corrected_sleep_data_cleaned, nan_value_df[['date', 'time_min', 'valid']], 
                                on=['date', 'time_min'], how='left')
 
         merged_data = merged_data[(merged_data['DateTime'] >= start_date) & (merged_data['DateTime'] <= end_date)]
-        merged_data.to_csv("./merged.csv")
+        # merged_data.to_csv("./merged.csv")
 
         merged_data['Category'] = merged_data.apply(categorize_row_updated, axis=1)
         merged_data['date'] = merged_data['DateTime'].dt.date
