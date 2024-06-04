@@ -199,9 +199,16 @@ def plot_activity(ax, id, start_date, end_date):
         corrected_id = id.replace('.', '_')
         table_activity = f'{corrected_id}_활동량'
 
+        # 데이터를 읽어올때 해당 데이터가 mm/dd/yyyy 형식이면 해당을 yyyy-mm-dd 형식으로 변환
         query_activity = f"""
-        SELECT * FROM {table_activity}
-        WHERE date BETWEEN '{start_date}' AND '{end_date}'
+        SELECT
+            CASE
+                WHEN CHAR_LENGTH(date) = 10 THEN STR_TO_DATE(date, '%m/%d/%Y')
+                ELSE STR_TO_DATE(date, '%Y-%m-%d')
+            END as date,
+            steps
+        FROM {table_activity}
+        WHERE date BETWEEN STR_TO_DATE('{start_date}', '%Y-%m-%d') AND STR_TO_DATE('{end_date}', '%Y-%m-%d')
         """
         df = pd.read_sql(query_activity, engine)
 
@@ -209,6 +216,7 @@ def plot_activity(ax, id, start_date, end_date):
             return None, None, None
 
         df = df[df['date'] != '-1']
+        
         df['date'] = pd.to_datetime(df['date'], errors='coerce')
         df = df.dropna(subset=['date'])
 
@@ -427,6 +435,7 @@ def page_about():
     if device_info is not None:
         device_info = device_info.replace('_', '.')
 
+    # start date 와 last date 는 2023-08-10 형식으로 들어감
     start_date = st.sidebar.date_input("Start Date", None)
     last_date = st.sidebar.date_input("Last Date", None)
 
