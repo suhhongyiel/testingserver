@@ -179,7 +179,7 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
                 hour_data = day_data[day_data['hour'] == hour]
                 if not hour_data.empty:
                     value = int(hour_data.iloc[0]['value'])  # 첫 번째 값을 사용하고 정수형으로 변환
-                    bars = ax.bar(date, 1, bottom=hour, color=['blue', 'orange', 'green'][value % 3], align='edge')
+                    bars = ax.bar(date, 1, bottom=hour, color=[(52,49,76), 'orange', 'green'][value % 3], align='edge')
             
         
 
