@@ -15,6 +15,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 import utils
 from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.colors as mcolors
 
 # csv 에서 drop 하는 컬럼 조건이 다르면 안됨
 # 해당 컬럼에서 조건이 다르면 해당 조건에서 0과 -1에서 drop 되는 날짜의 갯수들이 다르기 때문
@@ -283,7 +284,19 @@ def sleep_table_area(ax, df, start_date, end_date):
         table.set_fontsize(10)  # 폰트 크기 설정
         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
         
-        
+                # 색상 정의
+        colors = {
+            'sleep': mcolors.CSS4_COLORS['lightgreen'],
+            'missing': mcolors.CSS4_COLORS['lightgrey'],
+            'wake': mcolors.CSS4_COLORS['lightcoral']
+        }
+
+        # 행 색상 설정
+        for (i, key) in enumerate(pivot_table.index):
+            for j in range(len(pivot_table.columns)):
+                table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
+
+
         ax.axis('off')  # 축 비활성화
 
     except Exception as e:
