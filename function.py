@@ -254,64 +254,64 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
     ax.axis('off')  # Hide the axes
     return ax
 
-# def sleep_table_area(ax, df, start_date, end_date):
-#     try:
-#         # 데이터 로드 및 날짜 필터링
-#         df['datetime'] = pd.to_datetime(df['datetime'])
-        
-#         # 날짜별 라벨 집계
-#         df['date'] = df['datetime'].dt.date
-#         unique_dates = sorted(df['date'].unique())
-#         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
-#         df['date_index'] = df['date'].map(date_index_map)
-
-#         df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
-        
-#         # 피벗 테이블 생성: 라벨별, 날짜별 집계
-#         pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
-
-#         # 피벗 테이블을 텍스트 테이블로 플롯
-#         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
-#         table.auto_set_font_size(False)
-#         table.set_fontsize(10)  # 폰트 크기 설정
-#         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
-        
-        
-#         ax.axis('off')  # 축 비활성화
-
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-    
-#     return ax
-
 def sleep_table_area(ax, df, start_date, end_date):
     try:
         # 데이터 로드 및 날짜 필터링
         df['datetime'] = pd.to_datetime(df['datetime'])
         
-        # 날짜 및 시간별 라벨 집계
-        df['hour'] = df['datetime'].dt.floor('H')  # 시간 단위로 바꿈
+        # 날짜별 라벨 집계
         df['date'] = df['datetime'].dt.date
+        unique_dates = sorted(df['date'].unique())
+        date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
+        df['date_index'] = df['date'].map(date_index_map)
 
-        # 날짜 필터링
-        df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
-
-        # 시간별 집계
         df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
-        pivot_table = df.pivot_table(index=['label'], columns=df['hour'].dt.strftime('%Y-%m-%d %H:%M'), aggfunc='size', fill_value=0)
         
+        # 피벗 테이블 생성: 라벨별, 날짜별 집계
+        pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
+
         # 피벗 테이블을 텍스트 테이블로 플롯
         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
         table.auto_set_font_size(False)
         table.set_fontsize(10)  # 폰트 크기 설정
         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
-
+        
+        
         ax.axis('off')  # 축 비활성화
 
     except Exception as e:
         print(f"An error occurred: {e}")
     
     return ax
+
+# def sleep_table_area(ax, df, start_date, end_date):
+#     try:
+#         # 데이터 로드 및 날짜 필터링
+#         df['datetime'] = pd.to_datetime(df['datetime'])
+        
+#         # 날짜 및 시간별 라벨 집계
+#         df['hour'] = df['datetime'].dt.floor('H')  # 시간 단위로 바꿈
+#         df['date'] = df['datetime'].dt.date
+
+#         # 날짜 필터링
+#         df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
+
+#         # 시간별 집계
+#         df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
+#         pivot_table = df.pivot_table(index=['label'], columns=df['hour'].dt.strftime('%Y-%m-%d %H:%M'), aggfunc='size', fill_value=0)
+        
+#         # 피벗 테이블을 텍스트 테이블로 플롯
+#         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
+#         table.auto_set_font_size(False)
+#         table.set_fontsize(10)  # 폰트 크기 설정
+#         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
+
+#         ax.axis('off')  # 축 비활성화
+
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+    
+#     return ax
 
 # PDF export function
 def export_plots_to_pdf(fig, filename='report.pdf'):
