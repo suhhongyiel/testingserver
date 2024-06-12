@@ -88,9 +88,6 @@ def page_about():
     table_activity = f'{device_info}_활동량'
     table_sleep_detail = f'{device_info}_수면상세'
 
-    st.write(start_date)
-    st.write(last_date)
-
 
     # SQL 형태의 데이터 호출
     resting_heart_rate_df = pd.read_sql(f"SELECT * FROM {table_resting_heart_rate}", engine)
@@ -116,9 +113,6 @@ def page_about():
 
     # date 를 23:59:59 형태로 변경해야함
     last_date = last_date.replace(hour=23, minute=59, second=0)
-
-    st.write(last_date)
-
 
 
     # 해당 데이터 프레임을 실제 입력된 date 로 변경
