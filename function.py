@@ -267,6 +267,8 @@ def sleep_table_area(ax, df, start_date, end_date):
 
         df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
         
+        st.write(df['label'])
+        
         # 피벗 테이블 생성: 라벨별, 날짜별 집계
         pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
 
