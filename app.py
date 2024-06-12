@@ -27,6 +27,13 @@ engine = create_engine(db_url)
 # < === 페이지 레이아웃 === >
 def page_about():
     st.title("DataBase")
+
+    # patients demographic 정보 기입
+    patient_age = st.sidebar.number_input("Age", min_value=0, max_value=120, value=62)  # Default age is 62
+    patient_sex = st.sidebar.selectbox("Sex", options=["Male", "Female", "Other"])
+    cancer_type = st.sidebar.text_input("Cancer Type", value="Lung cancer")
+    treatment_type = st.sidebar.text_input("Treatment Type", value="Chemotherapy + immunotherapy")
+
     try:
         query = "SELECT study_ID FROM fitbit_device_list"
         device_info_options = [row[0] for row in pd.read_sql(query, engine).values]
@@ -148,7 +155,8 @@ def page_about():
 
     
     # ax function 에서 불러오기
-    ax0 = function.demographic_area(ax0, start_date, last_date, device_info)
+    # ax0 = function.demographic_area(ax0, start_date, last_date, device_info)
+    ax0 = function.demographic_area(ax0, start_date, last_date, device_info, patient_age, patient_sex, cancer_type, treatment_type)
     ax1 = function.plot_compliance(ax1, df_heart, start_date, last_date)
     ax2 = function.heart_rate_plot(ax2, df_heart, start_date, last_date)
     ax3 = function.plot_activity(ax3, df_activity, start_date, last_date)
@@ -162,6 +170,7 @@ def page_about():
     # i.e. smcfb.01.001_분별심박수, smcfb.01.001_활동량 .. etc
 
     # Add a button to trigger PDF export
+    st.write("Ready to export PDF")
     if st.button("Export to PDF"):
         function.export_plots_to_pdf(fig)
     

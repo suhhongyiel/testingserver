@@ -14,6 +14,7 @@ import matplotlib.dates as mdates
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 import utils
+from matplotlib.backends.backend_pdf import PdfPages
 
 # csv 에서 drop 하는 컬럼 조건이 다르면 안됨
 # 해당 컬럼에서 조건이 다르면 해당 조건에서 0과 -1에서 drop 되는 날짜의 갯수들이 다르기 때문
@@ -231,7 +232,7 @@ def plot_compliance(ax, df, start_date, end_date):
         print(f"Error during plot_compliance: {e}")
         return
     
-def demographic_area(ax, start_date, end_date, id):
+def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatment_type):
     fontdict = {
         'family': 'serif',
         'color': 'black',
@@ -241,12 +242,12 @@ def demographic_area(ax, start_date, end_date, id):
     texts = [
         f"Fitbit ID: {id}",
         f"Tracking date: {start_date.strftime('%Y-%m-%d')} (Start) - {end_date.strftime('%Y-%m-%d')} (End)",
-        "Patient info: Age 62Y, Sex: Male",
-        "Cancer type: Lung cancer",
-        "Treatment Type: Chemotherapy + immunotherapy",
+        f"Patient info: Age {age}Y, Sex: {sex}",
+        f"Cancer type: {cancer_type}",
+        f"Treatment Type: {treatment_type}",
         f"Data extraction date: {datetime.today().strftime('%Y-%m-%d')}"
     ]
-    # Adding text line by line
+    # Add text line by line
     for i, text in enumerate(texts):
         ax.text(-0.1, 1 - 0.2 * i, text, transform=ax.transAxes, va='top', ha='left')
 
@@ -283,8 +284,18 @@ def sleep_table_area(ax, df, start_date, end_date):
     
     return ax
 
+
 # PDF export function
-def export_plots_to_pdf(fig, filename="output.pdf"):
-    with PdfPages(filename) as export_pdf:
-        export_pdf.savefig(fig)
-        st.success("PDF saved successfully!")
+def export_plots_to_pdf(fig, filename='report.pdf'):
+    with PdfPages(filename) as pdf:
+        pdf.savefig(fig)
+        plt.close(fig)
+    st.success('Exported the plot to PDF successfully!')
+    # Create a download button
+    with open(filename, "rb") as f:
+        st.download_button(
+            label="Download PDF",
+            data=f,
+            file_name=filename,
+            mime="application/pdf"
+        )
