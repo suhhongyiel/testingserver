@@ -265,12 +265,17 @@ def sleep_table_area(ax, df, start_date, end_date):
         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
         df['date_index'] = df['date'].map(date_index_map)
 
-        df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
+        df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
         
         st.write(df['label'])
-        
+
+        # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
+        daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
+        daily_counts = daily_counts / 60
+        pivot_table = daily_counts.T
+
         # 피벗 테이블 생성: 라벨별, 날짜별 집계
-        pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
+        # pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
 
         # 피벗 테이블을 텍스트 테이블로 플롯
         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
