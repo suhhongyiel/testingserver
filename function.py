@@ -181,7 +181,7 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
                 hour_data = day_data[day_data['hour'] == hour]
                 if not hour_data.empty:
                     value = int(hour_data.iloc[0]['value'])  # 첫 번째 값을 사용하고 정수형으로 변환
-                    bars = ax.bar(date, 1, bottom=hour, color=['blue', 'orange', 'green'][value % 3], align='edge')
+                    bars = ax.bar(date, 1, bottom=hour, color=['lightcoral', 'lightgray', 'lightgreen'][value % 3], align='edge')
             
         
 
@@ -268,8 +268,6 @@ def sleep_table_area(ax, df, start_date, end_date):
 
         df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
         
-        st.write(df['label'])
-
         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
         daily_counts = (daily_counts / 60).round(1)
