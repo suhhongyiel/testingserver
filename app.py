@@ -92,6 +92,7 @@ def page_about():
     st.write(last_date)
 
 
+    # SQL 형태의 데이터 호출
     resting_heart_rate_df = pd.read_sql(f"SELECT * FROM {table_resting_heart_rate}", engine)
     heart_rate_df = pd.read_sql(f"SELECT * FROM {table_heart_rate}", engine)
     activity_df = pd.read_sql(f"SELECT * FROM {table_activity}", engine)
