@@ -16,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import utils
 import function
 from datetime import datetime
+from matplotlib.backends.backend_pdf import PdfPages
 
 import matplotlib.gridspec as gridspec
 
@@ -160,6 +161,10 @@ def page_about():
     # 해당 info 를 불러온 후 dbeaver 가 알아 먹는 parameter 로 replace 하여 해당 table 호출
     # i.e. smcfb.01.001_분별심박수, smcfb.01.001_활동량 .. etc
 
+    # Add a button to trigger PDF export
+    if st.button("Export to PDF"):
+        function.export_plots_to_pdf(fig)
+    
 # Usage example
 def main():
     pages = {

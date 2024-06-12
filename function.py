@@ -282,3 +282,9 @@ def sleep_table_area(ax, df, start_date, end_date):
         print(f"An error occurred: {e}")
     
     return ax
+
+# PDF export function
+def export_plots_to_pdf(fig, filename="output.pdf"):
+    with PdfPages(filename) as export_pdf:
+        export_pdf.savefig(fig)
+        st.success("PDF saved successfully!")
