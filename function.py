@@ -271,7 +271,7 @@ def sleep_table_area(ax, df, start_date, end_date):
 
         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
-        daily_counts = daily_counts / 60
+        daily_counts = (daily_counts / 60).round(1)
         pivot_table = daily_counts.T
 
         # 피벗 테이블 생성: 라벨별, 날짜별 집계
