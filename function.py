@@ -284,9 +284,9 @@ def sleep_table_area(ax, df, start_date, end_date):
         
                 # 색상 정의
         colors = {
-            'sleep': mcolors.CSS4_COLORS['lightgreen'],
+            'sleep': mcolors.CSS4_COLORS['lightcoral'],
             'missing': mcolors.CSS4_COLORS['lightgrey'],
-            'wake': mcolors.CSS4_COLORS['lightcoral']
+            'wake': mcolors.CSS4_COLORS['lightgreen']
         }
 
         # 행 색상 설정
