@@ -255,6 +255,49 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
     ax.axis('off')  # Hide the axes
     return ax
 
+def sleep_table_area(ax, df, start_date, end_date):
+    try:
+        # 데이터 로드 및 날짜 필터링
+        df['datetime'] = pd.to_datetime(df['datetime'])
+        df = df[(df['datetime'] >= pd.to_datetime(start_date)) & (df['datetime'] <= pd.to_datetime(end_date))]
+
+        # 날짜별 라벨 집계
+        df['date'] = df['datetime'].dt.date
+        unique_dates = sorted(df['date'].unique())
+        date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
+        df['date_index'] = df['date'].map(date_index_map)
+
+        df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
+        
+        # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
+        daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
+        daily_counts = (daily_counts / 60).round(1)
+        pivot_table = daily_counts.T
+
+        # 피벗 테이블을 텍스트 테이블로 플롯
+        table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)  # 폰트 크기 설정
+        table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
+        
+        # 색상 정의
+        colors = {
+            'sleep': mcolors.CSS4_COLORS['lightcoral'],
+            'missing': mcolors.CSS4_COLORS['lightgrey'],
+            'wake': mcolors.CSS4_COLORS['lightgreen']
+        }
+
+        # 행 색상 설정
+        for (i, key) in enumerate(pivot_table.index):
+            for j in range(len(pivot_table.columns)):
+                table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
+
+        ax.axis('off')  # 축 비활성화
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+    return ax
 
 
 # def sleep_table_area(ax, df, start_date, end_date):
@@ -304,34 +347,34 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
     
 #     return ax
 
-def sleep_table_area(ax, df, start_date, end_date):
-    try:
-        # 데이터 로드 및 날짜 필터링
-        df['datetime'] = pd.to_datetime(df['datetime'])
+# def sleep_table_area(ax, df, start_date, end_date):
+#     try:
+#         # 데이터 로드 및 날짜 필터링
+#         df['datetime'] = pd.to_datetime(df['datetime'])
         
-        # 날짜 및 시간별 라벨 집계
-        df['hour'] = df['datetime'].dt.floor('H')  # 시간 단위로 바꿈
-        df['date'] = df['datetime'].dt.date
+#         # 날짜 및 시간별 라벨 집계
+#         df['hour'] = df['datetime'].dt.floor('H')  # 시간 단위로 바꿈
+#         df['date'] = df['datetime'].dt.date
 
-        # 날짜 필터링
-        df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
+#         # 날짜 필터링
+#         df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
 
-        # 시간별 집계
-        df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
-        pivot_table = df.pivot_table(index=['label'], columns=df['hour'].dt.strftime('%Y-%m-%d %H:%M'), aggfunc='size', fill_value=0)
+#         # 시간별 집계
+#         df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
+#         pivot_table = df.pivot_table(index=['label'], columns=df['hour'].dt.strftime('%Y-%m-%d %H:%M'), aggfunc='size', fill_value=0)
         
-        # 피벗 테이블을 텍스트 테이블로 플롯
-        table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
-        table.auto_set_font_size(False)
-        table.set_fontsize(10)  # 폰트 크기 설정
-        table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
+#         # 피벗 테이블을 텍스트 테이블로 플롯
+#         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
+#         table.auto_set_font_size(False)
+#         table.set_fontsize(10)  # 폰트 크기 설정
+#         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
 
-        ax.axis('off')  # 축 비활성화
+#         ax.axis('off')  # 축 비활성화
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
     
-    return ax
+#     return ax
 
 # PDF export function
 def export_plots_to_pdf(fig, filename='report.pdf'):
