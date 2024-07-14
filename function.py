@@ -255,11 +255,13 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
     ax.axis('off')  # Hide the axes
     return ax
 
+
 def sleep_table_area(ax, df, start_date, end_date):
     try:
         # 데이터 로드 및 날짜 필터링
         df['datetime'] = pd.to_datetime(df['datetime'])
-        
+        df = df[(df['datetime'] >= pd.to_datetime(start_date)) & (df['datetime'] <= pd.to_datetime(end_date))]
+
         # 날짜별 라벨 집계
         df['date'] = df['datetime'].dt.date
         unique_dates = sorted(df['date'].unique())
@@ -273,16 +275,18 @@ def sleep_table_area(ax, df, start_date, end_date):
         daily_counts = (daily_counts / 60).round(1)
         pivot_table = daily_counts.T
 
-        # 피벗 테이블 생성: 라벨별, 날짜별 집계
-        # pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
+        # 날짜를 5일 간격으로 병합
+        merged_dates = [unique_dates[i] for i in range(0, len(unique_dates), 5)]
+        merged_pivot_table = pivot_table.groupby(lambda x: x // 5, axis=1).sum()
+        merged_pivot_table.columns = merged_dates
 
         # 피벗 테이블을 텍스트 테이블로 플롯
-        table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
+        table = ax.table(cellText=merged_pivot_table.values, colLabels=merged_pivot_table.columns, rowLabels=merged_pivot_table.index, loc='center')
         table.auto_set_font_size(False)
         table.set_fontsize(10)  # 폰트 크기 설정
         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
         
-                # 색상 정의
+        # 색상 정의
         colors = {
             'sleep': mcolors.CSS4_COLORS['lightcoral'],
             'missing': mcolors.CSS4_COLORS['lightgrey'],
@@ -290,10 +294,9 @@ def sleep_table_area(ax, df, start_date, end_date):
         }
 
         # 행 색상 설정
-        for (i, key) in enumerate(pivot_table.index):
-            for j in range(len(pivot_table.columns)):
+        for (i, key) in enumerate(merged_pivot_table.index):
+            for j in range(len(merged_pivot_table.columns)):
                 table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
-
 
         ax.axis('off')  # 축 비활성화
 
@@ -301,6 +304,52 @@ def sleep_table_area(ax, df, start_date, end_date):
         print(f"An error occurred: {e}")
     
     return ax
+# def sleep_table_area(ax, df, start_date, end_date):
+#     try:
+#         # 데이터 로드 및 날짜 필터링
+#         df['datetime'] = pd.to_datetime(df['datetime'])
+        
+#         # 날짜별 라벨 집계
+#         df['date'] = df['datetime'].dt.date
+#         unique_dates = sorted(df['date'].unique())
+#         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
+#         df['date_index'] = df['date'].map(date_index_map)
+
+#         df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
+        
+#         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
+#         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
+#         daily_counts = (daily_counts / 60).round(1)
+#         pivot_table = daily_counts.T
+
+#         # 피벗 테이블 생성: 라벨별, 날짜별 집계
+#         # pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
+
+#         # 피벗 테이블을 텍스트 테이블로 플롯
+#         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
+#         table.auto_set_font_size(False)
+#         table.set_fontsize(10)  # 폰트 크기 설정
+#         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
+        
+#                 # 색상 정의
+#         colors = {
+#             'sleep': mcolors.CSS4_COLORS['lightcoral'],
+#             'missing': mcolors.CSS4_COLORS['lightgrey'],
+#             'wake': mcolors.CSS4_COLORS['lightgreen']
+#         }
+
+#         # 행 색상 설정
+#         for (i, key) in enumerate(pivot_table.index):
+#             for j in range(len(pivot_table.columns)):
+#                 table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
+
+
+#         ax.axis('off')  # 축 비활성화
+
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+    
+#     return ax
 
 # def sleep_table_area(ax, df, start_date, end_date):
 #     try:
