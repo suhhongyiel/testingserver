@@ -377,23 +377,26 @@ def sleep_table_area(ax, df, start_date, end_date):
 
         # 셀 추가
         nrows, ncols = pivot_table.shape
-        width, height = 1.0 / (ncols // 5 + 1), 1.0 / (nrows + 1)
+        width, height = 1.0 / (ncols + 1), 1.0 / (nrows + 1)
 
         # 컬럼 레이블 추가
         col_spans = 5
         for j in range(0, ncols, col_spans):
             date_label = unique_dates[j] if j < len(unique_dates) else ''
-            table.add_cell(0, j // col_spans, col_spans * width, height, text=date_label, loc='center', facecolor='white')
+            table.add_cell(0, j, col_spans * width, height, text=date_label, loc='center', facecolor='white', edgecolor='black')
+            for k in range(col_spans):
+                if j + k < ncols:
+                    table.add_cell(0, j + k, width, height, text='', loc='center', facecolor='white', edgecolor='white')
 
         # 데이터 셀 추가
         for i, label in enumerate(pivot_table.index):
             for j in range(ncols):
                 color = colors.get(label, 'white')
-                table.add_cell(i + 1, j, width / col_spans, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color)
+                table.add_cell(i + 1, j, width, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color, edgecolor='black')
 
         # 행 라벨 추가
         for i, label in enumerate(pivot_table.index):
-            table.add_cell(i + 1, -1, width, height, text=label, loc='right', facecolor='white')
+            table.add_cell(i + 1, -1, width, height, text=label, loc='right', facecolor='white', edgecolor='black')
 
         ax.add_table(table)
         ax.axis('off')  # 축 비활성화
