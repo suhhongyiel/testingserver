@@ -347,7 +347,6 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
 #         print(f"An error occurred: {e}")
     
 #     return ax
-
 def sleep_table_area(ax, df, start_date, end_date):
     try:
         # 데이터 로드 및 날짜 필터링
@@ -390,7 +389,7 @@ def sleep_table_area(ax, df, start_date, end_date):
         for i, label in enumerate(pivot_table.index):
             for j in range(ncols):
                 color = colors.get(label, 'white')
-                table.add_cell(i + 1, j // col_spans, width, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color)
+                table.add_cell(i + 1, j, width / col_spans, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color)
 
         # 행 라벨 추가
         for i, label in enumerate(pivot_table.index):
