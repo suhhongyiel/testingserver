@@ -48,6 +48,10 @@ def page_about():
             st.warning("Please select a device ID.")
             return  # 디바이스 ID가 선택되지 않았다면 여기서 중단
 
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+        progress_text.text("Loading resting heart rate data...")
+
         table_resting_heart_rate = f'{device_info}_휴식기심박수'
         df = pd.read_sql(f"SELECT date FROM {table_resting_heart_rate}", engine)
         df['date'] = pd.to_datetime(df['date'], errors='coerce')
@@ -85,7 +89,7 @@ def page_about():
 
     progress_step += 1
     progress_bar.progress(progress_step / 10)
-    progress_text.text("Loading resting heart rate data...")
+    progress_text.text("Loading heart rate data...")
 
     table_resting_heart_rate = f'{device_info}_휴식기심박수'
     table_heart_rate = f'{device_info}_분별심박수'
@@ -148,7 +152,7 @@ def page_about():
         progress_bar.progress(progress_step / 10)
         progress_text.text("Creating plots...")
 
-        fig = plt.figure(figsize=(15, 20))  # Increase figure size
+        fig = plt.figure(figsize=(20, 10))  # Increase figure size
         gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[2, 2, 2, 2, 2, 1])
 
         ax0 = fig.add_subplot(gs[0])
