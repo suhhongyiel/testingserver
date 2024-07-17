@@ -148,7 +148,7 @@ def page_about():
         progress_bar.progress(progress_step / 10)
         progress_text.text("Creating plots...")
 
-        fig = plt.figure(figsize=(10, 15))
+        fig = plt.figure(figsize=(15, 20))  # Increase figure size
         gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[2, 2, 2, 2, 2, 1])
 
         ax0 = fig.add_subplot(gs[0])
