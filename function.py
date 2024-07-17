@@ -369,7 +369,7 @@ def sleep_table_area(ax, df, start_date, end_date):
         col_labels = [date if (i % 5 == 0) else '' for i, date in enumerate(pivot_table.columns)]
 
         # 피벗 테이블을 텍스트 테이블로 플롯
-        table = ax.table(cellText=pivot_table.values, colLabels=col_labels, rowLabels=pivot_table.index, loc='left')
+        table = ax.table(cellText=pivot_table.values, colLabels=col_labels, rowLabels=pivot_table.index, loc='center')
         table.auto_set_font_size(False)
         table.set_fontsize(10)  # 폰트 크기 설정
         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
