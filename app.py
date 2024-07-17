@@ -28,6 +28,11 @@ engine = create_engine(db_url)
 def page_about():
     st.title("DataBase")
 
+    # 진행 바 초기화
+    progress_bar = st.progress(0)
+    progress_text = st.empty()
+    progress_step = 0
+
     # patients demographic 정보 기입
     patient_age = st.sidebar.number_input("Age", min_value=0, max_value=120, value=62)  # Default age is 62
     patient_sex = st.sidebar.selectbox("Sex", options=["Male", "Female", "Other"])
@@ -78,6 +83,10 @@ def page_about():
         st.error(f"An unexpected error occurred: {e}")
         return  # 기타 예외 발생 시 중단
 
+    progress_step += 1
+    progress_bar.progress(progress_step / 10)
+    progress_text.text("Loading resting heart rate data...")
+
     table_resting_heart_rate = f'{device_info}_휴식기심박수'
     table_heart_rate = f'{device_info}_분별심박수'
     table_activity = f'{device_info}_활동량'
@@ -103,10 +112,24 @@ def page_about():
         """)
 
         resting_heart_rate_df = pd.read_sql(resting_heart_rate_query, engine, params={"start_date": start_date, "end_date": last_date})
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+        progress_text.text("Loading heart rate data...")
+
         heart_rate_df = pd.read_sql(heart_rate_query, engine, params={"start_date": start_date, "end_date": last_date})
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+        progress_text.text("Loading activity data...")
+
         activity_df = pd.read_sql(activity_query, engine, params={"start_date": start_date, "end_date": last_date})
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+        progress_text.text("Loading sleep detail data...")
+
         sleep_detail_df = pd.read_sql(sleep_detail_query, engine, params={"start_date": start_date, "end_date": last_date})
-        
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+
         # date를 datetime 형식으로 변환
         for df in [resting_heart_rate_df, heart_rate_df, activity_df, sleep_detail_df]:
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
@@ -114,11 +137,16 @@ def page_about():
 
         last_date = last_date.replace(hour=23, minute=59, second=0)
 
+        progress_text.text("Filtering data...")
         # 필터링된 데이터프레임
         df_resting = resting_heart_rate_df[(resting_heart_rate_df['date'] >= start_date) & (resting_heart_rate_df['date'] <= last_date)]
         df_heart = heart_rate_df[(heart_rate_df['date'] >= start_date) & (heart_rate_df['date'] <= last_date)]
         df_activity = activity_df[(activity_df['date'] >= start_date) & (activity_df['date'] <= last_date)]
         df_sleep_detail = sleep_detail_df[(sleep_detail_df['date'] >= start_date) & (sleep_detail_df['date'] <= last_date)]
+
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+        progress_text.text("Creating plots...")
 
         fig = plt.figure(figsize=(10, 15))
         gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[2, 2, 2, 2, 2, 1])
@@ -131,14 +159,33 @@ def page_about():
         ax5 = fig.add_subplot(gs[5])
 
         ax0 = function.demographic_area(ax0, start_date, last_date, device_info, patient_age, patient_sex, cancer_type, treatment_type)
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+
         ax1 = function.plot_compliance(ax1, df_heart, start_date, last_date)
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+
         ax2 = function.heart_rate_plot(ax2, df_heart, start_date, last_date)
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+
         ax3 = function.plot_activity(ax3, df_activity, start_date, last_date)
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+
         ax4, df_based = function.sleep_graph_ver(ax4, df_sleep_detail, df_heart, start_date, last_date)
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
+
         ax5 = function.sleep_table_area(ax5, df_based, start_date, last_date)
+        progress_step += 1
+        progress_bar.progress(progress_step / 10)
 
         plt.tight_layout()
         st.pyplot(fig)
+        progress_bar.empty()
+        progress_text.empty()
 
         if st.button("Export to PDF"):
             function.export_plots_to_pdf(fig)
