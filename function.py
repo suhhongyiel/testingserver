@@ -365,15 +365,9 @@ def sleep_table_area(ax, df, start_date, end_date):
         daily_counts = (daily_counts / 60).round(1)
         pivot_table = daily_counts.T
 
-        # 날짜 레이블을 5일에 한번씩 출력하도록 변경
-        col_labels = [date if (i % 5 == 0) else '' for i, date in enumerate(pivot_table.columns)]
+        # 피벗 테이블을 수동으로 생성하여 병합된 셀 추가
+        table = Table(ax, bbox=[0, 0, 1, 1])
 
-        # 피벗 테이블을 텍스트 테이블로 플롯
-        table = ax.table(cellText=pivot_table.values, colLabels=col_labels, rowLabels=pivot_table.index, loc='center')
-        table.auto_set_font_size(False)
-        table.set_fontsize(10)  # 폰트 크기 설정
-        table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
-        
         # 색상 정의
         colors = {
             'sleep': mcolors.CSS4_COLORS['lightcoral'],
@@ -381,11 +375,30 @@ def sleep_table_area(ax, df, start_date, end_date):
             'wake': mcolors.CSS4_COLORS['lightgreen']
         }
 
-        # 행 색상 설정
-        for (i, key) in enumerate(pivot_table.index):
-            for j in range(len(pivot_table.columns)):
-                table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
+        # 셀 추가
+        nrows, ncols = pivot_table.shape
+        width, height = 1.0 / (ncols + 1), 1.0 / (nrows + 1)
 
+        # 컬럼 레이블 추가
+        col_spans = 5
+        for j in range(0, ncols, col_spans):
+            date_label = unique_dates[j] if j < len(unique_dates) else ''
+            table.add_cell(0, j, col_spans * width, height, text=date_label, loc='center', facecolor='white', edgecolor='black')
+            for k in range(col_spans):
+                if j + k < ncols:
+                    table.add_cell(0, j + k, width, height, text='', loc='center', facecolor='white', edgecolor='white')
+
+        # 데이터 셀 추가
+        for i, label in enumerate(pivot_table.index):
+            for j in range(ncols):
+                color = colors.get(label, 'white')
+                table.add_cell(i + 1, j, width, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color, edgecolor='black')
+
+        # 행 라벨 추가
+        for i, label in enumerate(pivot_table.index):
+            table.add_cell(i + 1, -1, width, height, text=label, loc='right', facecolor='white', edgecolor='black')
+
+        ax.add_table(table)
         ax.axis('off')  # 축 비활성화
 
     except Exception as e:
