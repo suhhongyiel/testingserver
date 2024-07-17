@@ -37,19 +37,16 @@ def page_about():
     try:
         query = "SELECT study_ID FROM fitbit_device_list"
         device_info_options = [row[0] for row in pd.read_sql(query, engine).values]
-        # 해당 device 의 명단리스트를 쭉 부르고 
-        # 해당 리스트를 선택하면 선택할 수 있는 slider 가 보이고 해당 slider 를 조작하면 해당되는 plot 들이 pdf 로 출력
         device_info = st.sidebar.selectbox("Fitbit ID:", device_info_options)
         
         if device_info is None:
             st.warning("Please select a device ID.")
             return  # 디바이스 ID가 선택되지 않았다면 여기서 중단
 
-        table_resting_heart_rate = f'{device_info}_휴식기심박수' # 기본 date 범위를 알아보기위해 휴식기 심박수 데이터를 불러옴
-        df = pd.read_sql(f"SELECT * FROM {table_resting_heart_rate}", engine)
-        df['date'] = pd.to_datetime(df['date'], errors='coerce', format='mixed')
+        table_resting_heart_rate = f'{device_info}_휴식기심박수'
+        df = pd.read_sql(f"SELECT date FROM {table_resting_heart_rate}", engine)
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
-        # NaT 값이 있는지 확인하고, 있을 경우 처리
         if df['date'].isna().any():
             st.error("Some dates could not be converted and are missing (NaT). Please check the data.")
             return
@@ -59,27 +56,32 @@ def page_about():
         st.write("Earliest date in the data:", min_date)
         st.write("Latest date in the data:", max_date)
 
-        # format 을 맞추기 위한 pydatetime 포멧 변경
         max_date = max_date.to_pydatetime()
         min_date = min_date.to_pydatetime()
 
-
-        # 모든 데이터를 호출 한뒤 plot 을 진행
         if pd.notnull(min_date) and pd.notnull(max_date):
             start_date, last_date = st.slider("날짜 범위 선택:", 
                                             min_value=min_date, 
                                             max_value=max_date, 
                                             value=(min_date, max_date),
                                             format='YYYY-MM-DD')
-            
         else:
             st.error("Valid date range is not available in the data.")
+            return  # 유효한 날짜 범위가 없다면 여기서 중단
     except SQLAlchemyError as e:
         st.error(f"An error occurred with the database: {e}")
+        return  # 데이터베이스 오류 발생 시 중단
     except ValueError as e:
         st.error(f"Date format error: {e}")
+        return  # 날짜 형식 오류 발생 시 중단
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
+        return  # 기타 예외 발생 시 중단
+
+    table_resting_heart_rate = f'{device_info}_휴식기심박수'
+    table_heart_rate = f'{device_info}_분별심박수'
+    table_activity = f'{device_info}_활동량'
+    table_sleep_detail = f'{device_info}_수면상세'
 
     try:
         # SQL 형태의 데이터 호출 및 필터링을 쿼리에서 바로 수행
