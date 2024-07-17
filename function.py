@@ -301,52 +301,6 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
 #     return ax
 
 
-# def sleep_table_area(ax, df, start_date, end_date):
-#     try:
-#         # 데이터 로드 및 날짜 필터링
-#         df['datetime'] = pd.to_datetime(df['datetime'])
-        
-#         # 날짜별 라벨 집계
-#         df['date'] = df['datetime'].dt.date
-#         unique_dates = sorted(df['date'].unique())
-#         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
-#         df['date_index'] = df['date'].map(date_index_map)
-
-#         df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
-        
-#         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
-#         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
-#         daily_counts = (daily_counts / 60).round(1)
-#         pivot_table = daily_counts.T
-
-#         # 피벗 테이블 생성: 라벨별, 날짜별 집계
-#         # pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
-
-#         # 피벗 테이블을 텍스트 테이블로 플롯
-#         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
-#         table.auto_set_font_size(False)
-#         table.set_fontsize(10)  # 폰트 크기 설정
-#         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
-        
-#                 # 색상 정의
-#         colors = {
-#             'sleep': mcolors.CSS4_COLORS['lightcoral'],
-#             'missing': mcolors.CSS4_COLORS['lightgrey'],
-#             'wake': mcolors.CSS4_COLORS['lightgreen']
-#         }
-
-#         # 행 색상 설정
-#         for (i, key) in enumerate(pivot_table.index):
-#             for j in range(len(pivot_table.columns)):
-#                 table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
-
-
-#         ax.axis('off')  # 축 비활성화
-
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-    
-#     return ax
 def sleep_table_area(ax, df, start_date, end_date):
     try:
         # 데이터 로드 및 날짜 필터링
@@ -365,46 +319,92 @@ def sleep_table_area(ax, df, start_date, end_date):
         daily_counts = (daily_counts / 60).round(1)
         pivot_table = daily_counts.T
 
-        # 피벗 테이블을 수동으로 생성하여 병합된 셀 추가
-        table = Table(ax, bbox=[0, 0, 1, 1])
+        # 피벗 테이블 생성: 라벨별, 날짜별 집계
+        # pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
 
-        # 색상 정의
+        # 피벗 테이블을 텍스트 테이블로 플롯
+        table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)  # 폰트 크기 설정
+        table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
+        
+                # 색상 정의
         colors = {
             'sleep': mcolors.CSS4_COLORS['lightcoral'],
             'missing': mcolors.CSS4_COLORS['lightgrey'],
             'wake': mcolors.CSS4_COLORS['lightgreen']
         }
 
-        # 셀 추가
-        nrows, ncols = pivot_table.shape
-        width, height = 1.0 / (ncols + 1), 1.0 / (nrows + 1)
+        # 행 색상 설정
+        for (i, key) in enumerate(pivot_table.index):
+            for j in range(len(pivot_table.columns)):
+                table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
 
-        # 컬럼 레이블 추가
-        col_spans = 5
-        for j in range(0, ncols, col_spans):
-            date_label = unique_dates[j] if j < len(unique_dates) else ''
-            table.add_cell(0, j, col_spans * width, height, text=date_label, loc='center', facecolor='white', edgecolor='black')
-            for k in range(col_spans):
-                if j + k < ncols:
-                    table.add_cell(0, j + k, width, height, text='', loc='center', facecolor='white', edgecolor='white')
 
-        # 데이터 셀 추가
-        for i, label in enumerate(pivot_table.index):
-            for j in range(ncols):
-                color = colors.get(label, 'white')
-                table.add_cell(i + 1, j, width, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color, edgecolor='black')
-
-        # 행 라벨 추가
-        for i, label in enumerate(pivot_table.index):
-            table.add_cell(i + 1, -1, width, height, text=label, loc='right', facecolor='white', edgecolor='black')
-
-        ax.add_table(table)
         ax.axis('off')  # 축 비활성화
 
     except Exception as e:
         print(f"An error occurred: {e}")
     
     return ax
+# def sleep_table_area(ax, df, start_date, end_date):
+#     try:
+#         # 데이터 로드 및 날짜 필터링
+#         df['datetime'] = pd.to_datetime(df['datetime'])
+        
+#         # 날짜별 라벨 집계
+#         df['date'] = df['datetime'].dt.date
+#         unique_dates = sorted(df['date'].unique())
+#         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
+#         df['date_index'] = df['date'].map(date_index_map)
+
+#         df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
+        
+#         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
+#         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
+#         daily_counts = (daily_counts / 60).round(1)
+#         pivot_table = daily_counts.T
+
+#         # 피벗 테이블을 수동으로 생성하여 병합된 셀 추가
+#         table = Table(ax, bbox=[0, 0, 1, 1])
+
+#         # 색상 정의
+#         colors = {
+#             'sleep': mcolors.CSS4_COLORS['lightcoral'],
+#             'missing': mcolors.CSS4_COLORS['lightgrey'],
+#             'wake': mcolors.CSS4_COLORS['lightgreen']
+#         }
+
+#         # 셀 추가
+#         nrows, ncols = pivot_table.shape
+#         width, height = 1.0 / (ncols + 1), 1.0 / (nrows + 1)
+
+#         # 컬럼 레이블 추가
+#         col_spans = 5
+#         for j in range(0, ncols, col_spans):
+#             date_label = unique_dates[j] if j < len(unique_dates) else ''
+#             table.add_cell(0, j, col_spans * width, height, text=date_label, loc='center', facecolor='white', edgecolor='black')
+#             for k in range(col_spans):
+#                 if j + k < ncols:
+#                     table.add_cell(0, j + k, width, height, text='', loc='center', facecolor='white', edgecolor='white')
+
+#         # 데이터 셀 추가
+#         for i, label in enumerate(pivot_table.index):
+#             for j in range(ncols):
+#                 color = colors.get(label, 'white')
+#                 table.add_cell(i + 1, j, width, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color, edgecolor='black')
+
+#         # 행 라벨 추가
+#         for i, label in enumerate(pivot_table.index):
+#             table.add_cell(i + 1, -1, width, height, text=label, loc='right', facecolor='white', edgecolor='black')
+
+#         ax.add_table(table)
+#         ax.axis('off')  # 축 비활성화
+
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+    
+#     return ax
 
 
 # def sleep_table_area(ax, df, start_date, end_date):
