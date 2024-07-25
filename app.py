@@ -97,12 +97,6 @@ engine = create_engine(db_url)
 # < === 페이지 레이아웃 === >
 def page_about():
     st.title("DataBase")
-
-    # # 진행 바 초기화
-    # progress_bar = st.progress(0)
-    # progress_text = st.empty()
-    # progress_step = 0
-
     # patients demographic 정보 기입
     patient_age = st.sidebar.number_input("Age", min_value=0, max_value=120, value=62)  # Default age is 62
     patient_sex = st.sidebar.selectbox("Sex", options=["Male", "Female", "Other"])
@@ -134,15 +128,20 @@ def page_about():
         st.write("Earliest date in the data:", min_date)
         st.write("Latest date in the data:", max_date)
 
-        max_date = max_date.to_pydatetime()
-        min_date = min_date.to_pydatetime()
+        # max_date = max_date.to_pydatetime()
+        # min_date = min_date.to_pydatetime()
 
-        if pd.notnull(min_date) and pd.notnull(max_date):
-            start_date, last_date = st.slider("날짜 범위 선택:", 
-                                            min_value=min_date, 
-                                            max_value=max_date, 
-                                            value=(min_date, max_date),
-                                            format='YYYY-MM-DD')
+        # if pd.notnull(min_date) and pd.notnull(max_date):
+        #     start_date, last_date = st.slider("날짜 범위 선택:", 
+        #                                     min_value=min_date, 
+        #                                     max_value=max_date, 
+        #                                     value=(min_date, max_date),
+        #                                     format='YYYY-MM-DD')
+
+        if min_date and max_date:
+            start_date, end_date = st.date_input("Select date range for data", [min_date, max_date], min_value=min_date, max_value=max_date, key="data_date_range")
+            start_date = start_date[0] if isinstance(start_date, list) else start_date
+            end_date = end_date[1] if isinstance(end_date, list) else end_date
         else:
             st.error("Valid date range is not available in the data.")
             return  # 유효한 날짜 범위가 없다면 여기서 중단
@@ -166,6 +165,9 @@ def page_about():
     table_sleep_detail = f'{device_info}_수면상세'
 
     try:
+        # last_date = end_date.replace(hour=23, minute=59, second=0)
+        last_date = end_date
+
         # SQL 형태의 데이터 호출 및 필터링을 쿼리에서 바로 수행
         # resting_heart_rate_query = text(f"""SELECT * FROM {table_resting_heart_rate} """)
         # heart_rate_query = text(f"""SELECT * FROM {table_heart_rate} """)
@@ -182,7 +184,7 @@ def page_about():
         #     df['date'] = pd.to_datetime(df['date'], errors='coerce')
         #     df.dropna(subset=['date'], inplace=True)  # 날짜 변환 실패한 행 제거
 
-        last_date = last_date.replace(hour=23, minute=59, second=0)
+        
 
         # 필터링된 데이터프레임
         # df_resting = resting_heart_rate_df[(resting_heart_rate_df['date'] >= start_date) & (resting_heart_rate_df['date'] <= last_date)]
