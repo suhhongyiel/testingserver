@@ -13,7 +13,54 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.dates as mdates
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
+def parse_date(date_str):
+    # 가능한 날짜 형식을 모두 나열합니다.
+    date_formats = [
+        '%Y-%m-%d',  # 2023-08-22
+        '%y/%d/%Y',  # 23/22/2023
+        '%m/%d/%Y',  # 06/09/2023
+        '%Y/%m/%d',  # 2023/06/09
+        '%d/%m/%Y',  # 09/06/2023
+        '%d-%m-%Y',  # 09-06-2023
+    ]
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+    return None  # 날짜 형식에 맞지 않으면 None 반환
 
+def unify_sleep_date_format(df, date_column, time_column=None):
+    df[date_column] = df[date_column].apply(parse_date)
+    df = df.dropna(subset=[date_column])
+    if time_column:
+        df[time_column] = df[time_column].apply(normalize_time)
+        df['datetime'] = pd.to_datetime(df[date_column].dt.strftime('%Y-%m-%d') + ' ' + df[time_column])
+        df = df.dropna(subset=['datetime'])
+        df = df.sort_values(by='datetime').reset_index(drop=True)
+
+    return df
+
+# 시간 데이터 변환 함수 정의
+def normalize_time(time_str):
+    try:
+        if pd.isna(time_str) or time_str in ['-1', '-1.0']:
+            return '00:00:00'
+        if 'AM' in time_str or 'PM' in time_str:
+            return pd.to_datetime(time_str, format='%I:%M:%S %p').strftime('%H:%M:%S')
+        parts = time_str.split(':')
+        if len(parts) == 2:  # mm:ss.0 형식
+            minutes, seconds = parts
+            seconds = seconds.split('.')[0]
+            return f"00:{minutes}:{seconds}"
+        elif len(parts) == 3:  # hh:mm:ss.0 형식
+            hours, minutes, seconds = parts
+            seconds = seconds.split('.')[0]
+            return f"{hours}:{minutes}:{seconds}"
+    except Exception as e:
+        print(f"Error converting time: {e}")
+        return '00:00:00'
+    
 # 데이터 검증을 위한 함수
 def validate_dataframe(df, expected_columns):
     if df.empty:
@@ -116,3 +163,26 @@ def create_full_datetime_range(df, start_date, end_date):
 
     merged_df = pd.merge(full_df, df, on=['datetime', 'user_id'], how='left')
     return merged_df
+
+
+def fetch_patient_data(table_name, date_column, engine, time_column=None, start_date=None, end_date=None):
+    try:
+        query = f"SELECT * FROM {table_name}"
+        df = pd.read_sql(query, engine)
+        # 날짜 열을 다양한 형식으로 변환 후 통일
+        if "수면상세" in table_name:
+            df = unify_sleep_date_format(df, date_column, time_column)
+        else:
+            df = unify_sleep_date_format(df, date_column, time_column)
+        if start_date and end_date:
+            # datetime.date 객체를 datetime.datetime 객체로 변환
+            start_date = datetime.combine(start_date, datetime.min.time())
+            end_date = datetime.combine(end_date, datetime.min.time())
+            if time_column:
+                df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
+            else:
+                df = df[(df[date_column] >= start_date) & (df[date_column] <= end_date)]
+        return df
+    except Exception as e:
+        st.error(f"Error fetching data from {table_name}: {e}")
+        return None

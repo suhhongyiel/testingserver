@@ -46,43 +46,50 @@ def normalize_time(time_str):
 db_url = 'mysql+pymysql://root:Korea2022!@119.67.109.156:3306/project_wd'
 engine = create_engine(db_url)
 
-def heart_rate_plot(ax, df, start_date, end_date):
+def heart_rate_plot(ax,df, start_date, end_date):
     try:
+        # Ensure the 'value' column is numeric and 'date' column is datetime
         df['value'] = pd.to_numeric(df['value'], errors='coerce')
         df['date'] = pd.to_datetime(df['date'])
-        daily_mean = df.groupby(df['date'].dt.date)['value'].mean()
 
-        # DataFrame으로 변환하여 필터링 가능하게 조정
-        daily_mean = daily_mean.reset_index()
+        # Calculate daily mean
+        daily_mean = df.groupby(df['date'].dt.date)['value'].mean().reset_index()
         daily_mean.columns = ['date', 'value']
         daily_mean['date'] = pd.to_datetime(daily_mean['date'])
 
+        # Filter the data between the specified start and end dates
         df_filtered = daily_mean[(daily_mean['date'] >= start_date) & (daily_mean['date'] <= end_date)]
 
+        # Calculate the quartiles for the filtered data
         quartile_data = df_filtered.groupby(df_filtered['date'].dt.date)['value'].quantile([0.25, 0.75]).unstack()
 
+        # Apply smoothing with a rolling window
         window_size = 3
         smoothed_mean = df_filtered['value'].rolling(window=window_size, center=True).mean()
         smoothed_q1 = quartile_data[0.25].rolling(window=window_size, center=True).mean()
         smoothed_q3 = quartile_data[0.75].rolling(window=window_size, center=True).mean()
 
-        ax.plot(df_filtered['date'], smoothed_mean, label='Mean', color='magenta')
-        ax.fill_between(df_filtered['date'], smoothed_q1, smoothed_q3, color='gray', alpha=0.2,
-                        label='Q1-Q3 (Interquartile Range)')
 
+        ax.plot(df_filtered['date'], smoothed_mean, label='Mean', color='magenta')
+        ax.fill_between(df_filtered['date'], smoothed_q1, smoothed_q3, color='gray', alpha=0.2, label='Q1-Q3 (Interquartile Range)')
+
+        # Format the x-axis
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-        ax.set_xlim([start_date, end_date])
+        ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
 
+        # Set labels and legend
         ax.set_xlabel('Date')
         ax.set_ylabel('Average Heart Rate')
         ax.legend()
         ax.grid(True)
-        ax.xaxis.set_visible(False)
+
+        
+        return ax, df_filtered
+
     except Exception as e:
         print(f"An error occurred: {e}")
-
-    return ax
+        return None, None
 
 def plot_activity(ax, df, start_date, end_date):
     try:
