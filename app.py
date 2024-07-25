@@ -194,7 +194,7 @@ def page_about():
 
         st.write(df_heart)
 
-        fig = plt.figure(figsize=(40, 20))  # Increase figure size
+        fig = plt.figure(figsize=(15, 20))  # Increase figure size
         gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[1, 2, 2, 2, 2, 2])
 
         ax0 = fig.add_subplot(gs[0])

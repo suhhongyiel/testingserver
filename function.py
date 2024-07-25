@@ -46,37 +46,46 @@ def normalize_time(time_str):
 db_url = 'mysql+pymysql://root:Korea2022!@119.67.109.156:3306/project_wd'
 engine = create_engine(db_url)
 
-
 def heart_rate_plot(ax, df, start_date, end_date):
-    
     try:
         # Ensure the 'value' column is numeric and 'date' column is datetime
-        # df['value'] = pd.to_numeric(df['value'], errors='coerce')
-        # df['date'] = pd.to_datetime(df['date'])
-        st.write(df)
-        # Calculate daily mean
-        daily_mean = df.groupby(df['date'].dt.date)['value'].mean().reset_index()
-        daily_mean.columns = ['date', 'value']
-        # daily_mean['date'] = pd.to_datetime(daily_mean['date'])
 
+
+        # Check for any rows with NaT in 'date' column and drop them
         
+        # Calculate daily mean and quartiles
+        daily_stats = df.groupby(df['date'].dt.date)['value'].agg(['mean', 'quantile']).reset_index()
+        daily_stats['Q1'] = df.groupby(df['date'].dt.date)['value'].quantile(0.25).values
+        daily_stats['Q3'] = df.groupby(df['date'].dt.date)['value'].quantile(0.75).values
+        daily_stats.columns = ['date', 'mean', 'quantile', 'Q1', 'Q3']
+        daily_stats['date'] = pd.to_datetime(daily_stats['date'])
+
+        # Extend the end date by 2 days
+        end_date_extended = pd.to_datetime(end_date)
+
         # Filter the data between the specified start and end dates
-        df_filtered = daily_mean[(daily_mean['date'] >= start_date) & (daily_mean['date'] <= end_date)]
-        st.write("df filtter")
-        st.write(df_filtered)
+        start_date_ts = pd.Timestamp(start_date)
+        end_date_ts = pd.Timestamp(end_date_extended)
+        df_filtered = daily_stats[(daily_stats['date'] >= start_date_ts) & (daily_stats['date'] <= end_date_ts)]
 
         # Apply smoothing with a rolling window
         window_size = 1
-        smoothed_mean = df_filtered['value'].rolling(window=window_size, center=True).mean()
+        smoothed_mean = df_filtered['mean'].rolling(window=window_size, center=True).mean().fillna(method='bfill').fillna(method='ffill')
+        smoothed_Q1 = df_filtered['Q1'].rolling(window=window_size, center=True).mean().fillna(method='bfill').fillna(method='ffill')
+        smoothed_Q3 = df_filtered['Q3'].rolling(window=window_size, center=True).mean().fillna(method='bfill').fillna(method='ffill')
 
         # Plot the data
         ax.plot(df_filtered['date'], smoothed_mean, label='Mean', color='magenta')
+        ax.fill_between(df_filtered['date'], smoothed_Q1, smoothed_Q3, color='gray', alpha=0.2, label='Q1-Q3 (Interquartile Range)')
+
+        # Set y-axis limit
+        ax.set_ylim(0, 200)
 
         # Format the x-axis
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-        ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
-
+        ax.set_xlim([start_date_ts, end_date_ts])
+        plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
         # Set labels and legend
         ax.set_xlabel('Date')
         ax.set_ylabel('Average Heart Rate')
@@ -86,53 +95,52 @@ def heart_rate_plot(ax, df, start_date, end_date):
         return ax, df_filtered
 
     except Exception as e:
-        st.write(f"Error: {e}")
+        print(f"Error: {e}")
         return ax, None
 
-# def heart_rate_plot(ax,df, start_date, end_date):
+# def heart_rate_plot(ax, df, start_date, end_date):
+    
 #     try:
 #         # Ensure the 'value' column is numeric and 'date' column is datetime
-#         # df['value'] = pd.to_numeric(df['value'], errors='coerce')
+#         df['value'] = pd.to_numeric(df['value'], errors='coerce')
 #         # df['date'] = pd.to_datetime(df['date'])
-
+#         st.write(df)
 #         # Calculate daily mean
 #         daily_mean = df.groupby(df['date'].dt.date)['value'].mean().reset_index()
 #         daily_mean.columns = ['date', 'value']
 #         # daily_mean['date'] = pd.to_datetime(daily_mean['date'])
 
+        
 #         # Filter the data between the specified start and end dates
 #         df_filtered = daily_mean[(daily_mean['date'] >= start_date) & (daily_mean['date'] <= end_date)]
-
-#         # Calculate the quartiles for the filtered data
-#         quartile_data = df_filtered.groupby(df_filtered['date'].dt.date)['value'].quantile([0.25, 0.75]).unstack()
+#         st.write("df filtter")
+#         st.write(df_filtered)
 
 #         # Apply smoothing with a rolling window
-#         window_size = 3
-#         smoothed_mean = df_filtered['value']
-#         # smoothed_q1 = quartile_data[0.25].rolling(window=window_size, center=True).mean()
-#         # smoothed_q3 = quartile_data[0.75].rolling(window=window_size, center=True).mean()
-
-
+#         window_size = 1
+#         smoothed_mean = df_filtered['value'].rolling(window=window_size, center=True).mean()
+#         st.write(smoothed_mean)
+#         ax.set_ylim(0, 200)
+#         # Plot the data
 #         ax.plot(df_filtered['date'], smoothed_mean, label='Mean', color='magenta')
-#         # ax.fill_between(df_filtered['date'], smoothed_q1, smoothed_q3, color='gray', alpha=0.2, label='Q1-Q3 (Interquartile Range)')
 
 #         # Format the x-axis
 #         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 #         ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
 #         ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
-
+#         plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
 #         # Set labels and legend
 #         ax.set_xlabel('Date')
 #         ax.set_ylabel('Average Heart Rate')
 #         ax.legend()
 #         ax.grid(True)
 
-        
 #         return ax, df_filtered
 
 #     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return None, None
+#         st.write(f"Error: {e}")
+#         return ax, None
+
 
 def plot_activity(ax, df, start_date, end_date):
     try:
@@ -145,8 +153,6 @@ def plot_activity(ax, df, start_date, end_date):
         
         time = df['date']
         steps = df['steps']
-
-        
 
         total_steps = steps.sum()
         daily_mean_steps = steps.mean()
@@ -165,7 +171,11 @@ def plot_activity(ax, df, start_date, end_date):
         df['week'] = df['date'].dt.isocalendar().week
         weekly_mean_steps = df.groupby('week')['steps'].mean()
         weekly_mean = weekly_mean_steps.mean()
-        ax.xaxis.set_visible(False)
+        ax.xaxis.set_visible(True)
+        
+        ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
+        ax.set_xlim(ax.get_xlim()[0] - pd.Timedelta(days=1), ax.get_xlim()[1] + pd.Timedelta(days=1)) # Add padding
+
         return ax
 
     except Exception as e:
