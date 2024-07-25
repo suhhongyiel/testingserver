@@ -251,7 +251,7 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
     ]
     # Add text line by line
     for i, text in enumerate(texts):
-        ax.text(-0.1, 1 - 0.2 * i, text, transform=ax.transAxes, va='top', ha='left')
+        ax.text(0.0, 1 - 0.2 * i, text, transform=ax.transAxes, va='top', ha='left', fontdict=fontdict)
 
     ax.axis('off')  # Hide the axes
     return ax

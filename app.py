@@ -28,10 +28,10 @@ engine = create_engine(db_url)
 def page_about():
     st.title("DataBase")
 
-    # 진행 바 초기화
-    progress_bar = st.progress(0)
-    progress_text = st.empty()
-    progress_step = 0
+    # # 진행 바 초기화
+    # progress_bar = st.progress(0)
+    # progress_text = st.empty()
+    # progress_step = 0
 
     # patients demographic 정보 기입
     patient_age = st.sidebar.number_input("Age", min_value=0, max_value=120, value=62)  # Default age is 62
@@ -40,6 +40,7 @@ def page_about():
     treatment_type = st.sidebar.text_input("Treatment Type", value="Chemotherapy + immunotherapy")
 
     try:
+        
         query = "SELECT study_ID FROM fitbit_device_list"
         device_info_options = [row[0] for row in pd.read_sql(query, engine).values]
         device_info = st.sidebar.selectbox("Fitbit ID:", device_info_options)
@@ -48,13 +49,11 @@ def page_about():
             st.warning("Please select a device ID.")
             return  # 디바이스 ID가 선택되지 않았다면 여기서 중단
 
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-        progress_text.text("Loading resting heart rate data...")
-
         table_resting_heart_rate = f'{device_info}_휴식기심박수'
         df = pd.read_sql(f"SELECT date FROM {table_resting_heart_rate}", engine)
-        df['date'] = pd.to_datetime(df['date'], errors='coerce')
+        df['date'] = pd.to_datetime(df['date'], format='mixed')
+
+        st.write(df)
 
         if df['date'].isna().any():
             st.error("Some dates could not be converted and are missing (NaT). Please check the data.")
@@ -87,9 +86,9 @@ def page_about():
         st.error(f"An unexpected error occurred: {e}")
         return  # 기타 예외 발생 시 중단
 
-    progress_step += 1
-    progress_bar.progress(progress_step / 10)
-    progress_text.text("Loading heart rate data...")
+    # progress_step += 1
+    # progress_bar.progress(min(progress_step / 10, 1.0))  # 1.0을 초과하지 않도록 함
+    # progress_text.text("Loading heart rate data...")
 
     table_resting_heart_rate = f'{device_info}_휴식기심박수'
     table_heart_rate = f'{device_info}_분별심박수'
@@ -114,25 +113,10 @@ def page_about():
             SELECT * FROM {table_sleep_detail} 
             WHERE date BETWEEN :start_date AND :end_date
         """)
-
         resting_heart_rate_df = pd.read_sql(resting_heart_rate_query, engine, params={"start_date": start_date, "end_date": last_date})
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-        progress_text.text("Loading heart rate data...")
-
         heart_rate_df = pd.read_sql(heart_rate_query, engine, params={"start_date": start_date, "end_date": last_date})
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-        progress_text.text("Loading activity data...")
-
         activity_df = pd.read_sql(activity_query, engine, params={"start_date": start_date, "end_date": last_date})
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-        progress_text.text("Loading sleep detail data...")
-
         sleep_detail_df = pd.read_sql(sleep_detail_query, engine, params={"start_date": start_date, "end_date": last_date})
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
 
         # date를 datetime 형식으로 변환
         for df in [resting_heart_rate_df, heart_rate_df, activity_df, sleep_detail_df]:
@@ -141,19 +125,14 @@ def page_about():
 
         last_date = last_date.replace(hour=23, minute=59, second=0)
 
-        progress_text.text("Filtering data...")
         # 필터링된 데이터프레임
         df_resting = resting_heart_rate_df[(resting_heart_rate_df['date'] >= start_date) & (resting_heart_rate_df['date'] <= last_date)]
         df_heart = heart_rate_df[(heart_rate_df['date'] >= start_date) & (heart_rate_df['date'] <= last_date)]
         df_activity = activity_df[(activity_df['date'] >= start_date) & (activity_df['date'] <= last_date)]
         df_sleep_detail = sleep_detail_df[(sleep_detail_df['date'] >= start_date) & (sleep_detail_df['date'] <= last_date)]
 
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-        progress_text.text("Creating plots...")
-
         fig = plt.figure(figsize=(40, 20))  # Increase figure size
-        gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[2, 2, 2, 2, 2, 1])
+        gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[1, 2, 2, 2, 2, 2])
 
         ax0 = fig.add_subplot(gs[0])
         ax1 = fig.add_subplot(gs[1])
@@ -162,34 +141,19 @@ def page_about():
         ax4 = fig.add_subplot(gs[4])
         ax5 = fig.add_subplot(gs[5])
 
+        # demographic_area를 맨 위 축에 추가
         ax0 = function.demographic_area(ax0, start_date, last_date, device_info, patient_age, patient_sex, cancer_type, treatment_type)
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
 
         ax1 = function.plot_compliance(ax1, df_heart, start_date, last_date)
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-
         ax2 = function.heart_rate_plot(ax2, df_heart, start_date, last_date)
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-
         ax3 = function.plot_activity(ax3, df_activity, start_date, last_date)
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-
         ax4, df_based = function.sleep_graph_ver(ax4, df_sleep_detail, df_heart, start_date, last_date)
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
-
         ax5 = function.sleep_table_area(ax5, df_based, start_date, last_date)
-        progress_step += 1
-        progress_bar.progress(progress_step / 10)
 
         plt.tight_layout()
         st.pyplot(fig)
-        progress_bar.empty()
-        progress_text.empty()
+        # progress_bar.empty()
+        # progress_text.empty()
 
         if st.button("Export to PDF"):
             function.export_plots_to_pdf(fig)
