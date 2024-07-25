@@ -47,6 +47,7 @@ db_url = 'mysql+pymysql://root:Korea2022!@119.67.109.156:3306/project_wd'
 engine = create_engine(db_url)
 
 def heart_rate_plot(ax, df, start_date, end_date):
+    title='Heart Rate Over Time'
     try:
         # Ensure the 'value' column is numeric and 'date' column is datetime
 
@@ -91,7 +92,7 @@ def heart_rate_plot(ax, df, start_date, end_date):
         ax.set_ylabel('Average Heart Rate')
         ax.legend()
         ax.grid(True)
-
+        ax.set_title(title, loc='left')
         return ax, df_filtered
 
     except Exception as e:
@@ -143,6 +144,8 @@ def heart_rate_plot(ax, df, start_date, end_date):
 
 
 def plot_activity(ax, df, start_date, end_date):
+    title='Activity Plot'
+
     try:
         df['date'] = pd.to_datetime(df['date'])
         df = df.groupby('date', as_index=False)['steps'].sum()
@@ -156,7 +159,7 @@ def plot_activity(ax, df, start_date, end_date):
 
         total_steps = steps.sum()
         daily_mean_steps = steps.mean()
-
+        ax.set_title(title, loc='left')
         ax.plot(time, steps, '-o', label="Steps", color='navy')
         ax.set_ylabel('Steps')
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
@@ -175,7 +178,7 @@ def plot_activity(ax, df, start_date, end_date):
         
         ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
         ax.set_xlim(ax.get_xlim()[0] - pd.Timedelta(days=1), ax.get_xlim()[1] + pd.Timedelta(days=1)) # Add padding
-
+        
         return ax
 
     except Exception as e:
@@ -183,6 +186,8 @@ def plot_activity(ax, df, start_date, end_date):
         return
 
 def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
+    title='Sleep graph for in 24 hours'
+
     try:
         # 시간 데이터 변환
         slp_df['converted_time'] = slp_df['time_stamp'].apply(normalize_time)
@@ -258,6 +263,7 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
         ax.set_xlabel('Date')
         ax.set_ylabel('Hour of Day')
         ax.xaxis.set_visible(False)
+        ax.set_title(title, loc='left')
         return ax, df_based
 
     except Exception as e:
@@ -266,34 +272,46 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
 
 def plot_compliance(ax, df, start_date, end_date):
     try:
-        
-        df['datetime'] = pd.to_datetime(df['date'].dt.date.astype(str) + ' ' + df['time_min'], errors='coerce')
+        # Combine date and time to create a full datetime column
+        df['datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time_min'], errors='coerce')
         df = df.dropna(subset=['datetime'])
-        
+
+        # Drop duplicates based on user_id and datetime
         df = df.drop_duplicates(subset=['user_id', 'datetime'], keep='first')
-        
+
+        # Create a 'valid' column for compliance check
         df['valid'] = (df['value'] != -1) & (df['value'] != 0)
+        df['valid'] = df['valid'].astype(int)
 
-        daily_compliance = df.groupby(df['datetime'].dt.date)['valid'].sum()
-        daily_total = df.groupby(df['datetime'].dt.date)['valid'].count()
+        # Group by date and calculate compliance
+        df['date'] = df['datetime'].dt.date
+        daily_compliance = df.groupby('date')['valid'].sum()
+        daily_total = df.groupby('date')['valid'].count()
 
-        daily_compliance_rate = (daily_compliance / 1440) * 100
-        daily_compliance_rate.plot(kind='bar', color='skyblue', ax=ax)
+        # Calculate daily compliance rate
+        daily_compliance_rate = (daily_compliance / daily_total) * 100
+
+        # Create a new DataFrame for compliance
+        compliance_df = pd.DataFrame({
+            'date': daily_compliance_rate.index,
+            'compliance_rate': daily_compliance_rate.values
+        })
+
+        # Plot the daily compliance rate
+        compliance_df.set_index('date')['compliance_rate'].plot(kind='bar', color='skyblue', ax=ax)
 
         ax.set_xlabel('Date')
         ax.set_ylabel('Compliance Rate (%)')
-        ax.set_title('Daily Heart Rate Compliance')
+        ax.set_title('Daily Heart Rate Compliance', loc='left')
 
-
-        # ax 의 x 축 제거
+        # Hide x-axis labels to avoid clutter
         ax.xaxis.set_visible(False)
-
         return ax
-    
+
     except Exception as e:
         print(f"Error during plot_compliance: {e}")
         return
-    
+
 def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatment_type):
     fontdict = {
         'family': 'serif',

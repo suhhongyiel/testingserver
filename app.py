@@ -117,8 +117,6 @@ def page_about():
         df = pd.read_sql(f"SELECT date FROM {table_resting_heart_rate}", engine)
         df['date'] = pd.to_datetime(df['date'], format='mixed')
 
-        st.write(df)
-
         if df['date'].isna().any():
             st.error("Some dates could not be converted and are missing (NaT). Please check the data.")
             return
@@ -192,7 +190,6 @@ def page_about():
         # df_activity = activity_df[(activity_df['date'] >= start_date) & (activity_df['date'] <= last_date)]
         # df_sleep_detail = sleep_detail_df[(sleep_detail_df['date'] >= start_date) & (sleep_detail_df['date'] <= last_date)]
 
-        st.write(df_heart)
 
         fig = plt.figure(figsize=(15, 20))  # Increase figure size
         gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[1, 2, 2, 2, 2, 2])
