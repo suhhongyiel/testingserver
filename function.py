@@ -99,50 +99,6 @@ def heart_rate_plot(ax, df, start_date, end_date):
         print(f"Error: {e}")
         return ax, None
 
-# def heart_rate_plot(ax, df, start_date, end_date):
-    
-#     try:
-#         # Ensure the 'value' column is numeric and 'date' column is datetime
-#         df['value'] = pd.to_numeric(df['value'], errors='coerce')
-#         # df['date'] = pd.to_datetime(df['date'])
-#         st.write(df)
-#         # Calculate daily mean
-#         daily_mean = df.groupby(df['date'].dt.date)['value'].mean().reset_index()
-#         daily_mean.columns = ['date', 'value']
-#         # daily_mean['date'] = pd.to_datetime(daily_mean['date'])
-
-        
-#         # Filter the data between the specified start and end dates
-#         df_filtered = daily_mean[(daily_mean['date'] >= start_date) & (daily_mean['date'] <= end_date)]
-#         st.write("df filtter")
-#         st.write(df_filtered)
-
-#         # Apply smoothing with a rolling window
-#         window_size = 1
-#         smoothed_mean = df_filtered['value'].rolling(window=window_size, center=True).mean()
-#         st.write(smoothed_mean)
-#         ax.set_ylim(0, 200)
-#         # Plot the data
-#         ax.plot(df_filtered['date'], smoothed_mean, label='Mean', color='magenta')
-
-#         # Format the x-axis
-#         ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-#         ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-#         ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
-#         plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
-#         # Set labels and legend
-#         ax.set_xlabel('Date')
-#         ax.set_ylabel('Average Heart Rate')
-#         ax.legend()
-#         ax.grid(True)
-
-#         return ax, df_filtered
-
-#     except Exception as e:
-#         st.write(f"Error: {e}")
-#         return ax, None
-
-
 def plot_activity(ax, df, start_date, end_date):
     title='Activity Plot'
 
@@ -273,8 +229,10 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
 def plot_compliance(ax, df, start_date, end_date):
     try:
         # Combine date and time to create a full datetime column
-        df['datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time_min'], errors='coerce')
+        df['datetime'] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time_min'])
         df = df.dropna(subset=['datetime'])
+
+        st.write(end_date)
 
         # Drop duplicates based on user_id and datetime
         df = df.drop_duplicates(subset=['user_id', 'datetime'], keep='first')
@@ -287,22 +245,22 @@ def plot_compliance(ax, df, start_date, end_date):
         df['date'] = df['datetime'].dt.date
         daily_compliance = df.groupby('date')['valid'].sum()
         daily_total = df.groupby('date')['valid'].count()
-
+        st.write(daily_compliance)
         # Calculate daily compliance rate
-        daily_compliance_rate = (daily_compliance / daily_total) * 100
+        daily_compliance_rate = (daily_compliance / 1440) * 100
 
         # Create a new DataFrame for compliance
         compliance_df = pd.DataFrame({
             'date': daily_compliance_rate.index,
             'compliance_rate': daily_compliance_rate.values
         })
-
+        st.write(compliance_df)
         # Plot the daily compliance rate
         compliance_df.set_index('date')['compliance_rate'].plot(kind='bar', color='skyblue', ax=ax)
 
         ax.set_xlabel('Date')
         ax.set_ylabel('Compliance Rate (%)')
-        ax.set_title('Daily Heart Rate Compliance', loc='left')
+        ax.set_title('Daily Compliance', loc='left')
 
         # Hide x-axis labels to avoid clutter
         ax.xaxis.set_visible(False)
@@ -334,50 +292,12 @@ def demographic_area(ax, start_date, end_date, id, age, sex, cancer_type, treatm
     ax.axis('off')  # Hide the axes
     return ax
 
-# def sleep_table_area(ax, df, start_date, end_date):
-#     try:
-#         # 데이터 로드 및 날짜 필터링
-#         df['datetime'] = pd.to_datetime(df['datetime'])
-#         df = df[(df['datetime'] >= pd.to_datetime(start_date)) & (df['datetime'] <= pd.to_datetime(end_date))]
-
-#         # 날짜별 라벨 집계
-#         df['date'] = df['datetime'].dt.date
-#         unique_dates = sorted(df['date'].unique())
-#         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
-#         df['date_index'] = df['date'].map(date_index_map)
-
-#         df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
-        
-#         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
-#         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
-#         daily_counts = (daily_counts / 60).round(1)
-#         pivot_table = daily_counts.T
-
-#         # 피벗 테이블을 텍스트 테이블로 플롯
-#         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
-#         table.auto_set_font_size(False)
-#         table.set_fontsize(10)  # 폰트 크기 설정
-#         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
-        
-#         # 색상 정의
-#         colors = {
-#             'sleep': mcolors.CSS4_COLORS['lightcoral'],
-#             'missing': mcolors.CSS4_COLORS['lightgrey'],
-#             'wake': mcolors.CSS4_COLORS['lightgreen']
-#         }
-
-#         # 행 색상 설정
-#         for (i, key) in enumerate(pivot_table.index):
-#             for j in range(len(pivot_table.columns)):
-#                 table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
-
-#         ax.axis('off')  # 축 비활성화
-
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-    
-#     return ax
-
+#5번째 값마다 빈 문자열로 대체하는 함수
+def replace_with_empty_at_interval(labels, interval=5):
+    for i in range(len(labels)):
+        if (i + 1) % interval != 0:
+            labels[i] = ''
+    return labels 
 
 def sleep_table_area(ax, df, start_date, end_date):
     try:
@@ -397,11 +317,12 @@ def sleep_table_area(ax, df, start_date, end_date):
         daily_counts = (daily_counts / 60).round(1)
         pivot_table = daily_counts.T
 
-        # 피벗 테이블 생성: 라벨별, 날짜별 집계
-        # pivot_table = df.pivot_table(index='label', columns='date_index', aggfunc='size', fill_value=0)
+
+        original_col_labels = list(pivot_table.columns)
+        col_labels = replace_with_empty_at_interval(original_col_labels)
 
         # 피벗 테이블을 텍스트 테이블로 플롯
-        table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
+        table = ax.table(cellText=pivot_table.values, colLabels=col_labels, rowLabels=pivot_table.index, loc='center')
         table.auto_set_font_size(False)
         table.set_fontsize(10)  # 폰트 크기 설정
         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
@@ -415,7 +336,7 @@ def sleep_table_area(ax, df, start_date, end_date):
 
         # 행 색상 설정
         for (i, key) in enumerate(pivot_table.index):
-            for j in range(len(pivot_table.columns)):
+            for j in range(len(col_labels)):
                 table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
 
 
@@ -425,94 +346,6 @@ def sleep_table_area(ax, df, start_date, end_date):
         print(f"An error occurred: {e}")
     
     return ax
-# def sleep_table_area(ax, df, start_date, end_date):
-#     try:
-#         # 데이터 로드 및 날짜 필터링
-#         df['datetime'] = pd.to_datetime(df['datetime'])
-        
-#         # 날짜별 라벨 집계
-#         df['date'] = df['datetime'].dt.date
-#         unique_dates = sorted(df['date'].unique())
-#         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
-#         df['date_index'] = df['date'].map(date_index_map)
-
-#         df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
-        
-#         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
-#         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
-#         daily_counts = (daily_counts / 60).round(1)
-#         pivot_table = daily_counts.T
-
-#         # 피벗 테이블을 수동으로 생성하여 병합된 셀 추가
-#         table = Table(ax, bbox=[0, 0, 1, 1])
-
-#         # 색상 정의
-#         colors = {
-#             'sleep': mcolors.CSS4_COLORS['lightcoral'],
-#             'missing': mcolors.CSS4_COLORS['lightgrey'],
-#             'wake': mcolors.CSS4_COLORS['lightgreen']
-#         }
-
-#         # 셀 추가
-#         nrows, ncols = pivot_table.shape
-#         width, height = 1.0 / (ncols + 1), 1.0 / (nrows + 1)
-
-#         # 컬럼 레이블 추가
-#         col_spans = 5
-#         for j in range(0, ncols, col_spans):
-#             date_label = unique_dates[j] if j < len(unique_dates) else ''
-#             table.add_cell(0, j, col_spans * width, height, text=date_label, loc='center', facecolor='white', edgecolor='black')
-#             for k in range(col_spans):
-#                 if j + k < ncols:
-#                     table.add_cell(0, j + k, width, height, text='', loc='center', facecolor='white', edgecolor='white')
-
-#         # 데이터 셀 추가
-#         for i, label in enumerate(pivot_table.index):
-#             for j in range(ncols):
-#                 color = colors.get(label, 'white')
-#                 table.add_cell(i + 1, j, width, height, text=pivot_table.iloc[i, j], loc='center', facecolor=color, edgecolor='black')
-
-#         # 행 라벨 추가
-#         for i, label in enumerate(pivot_table.index):
-#             table.add_cell(i + 1, -1, width, height, text=label, loc='right', facecolor='white', edgecolor='black')
-
-#         ax.add_table(table)
-#         ax.axis('off')  # 축 비활성화
-
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-    
-#     return ax
-
-
-# def sleep_table_area(ax, df, start_date, end_date):
-#     try:
-#         # 데이터 로드 및 날짜 필터링
-#         df['datetime'] = pd.to_datetime(df['datetime'])
-        
-#         # 날짜 및 시간별 라벨 집계
-#         df['hour'] = df['datetime'].dt.floor('H')  # 시간 단위로 바꿈
-#         df['date'] = df['datetime'].dt.date
-
-#         # 날짜 필터링
-#         df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
-
-#         # 시간별 집계
-#         df['label'] = df['value'].map({0: 'sleep', 1: 'wake', 2: 'missing'})
-#         pivot_table = df.pivot_table(index=['label'], columns=df['hour'].dt.strftime('%Y-%m-%d %H:%M'), aggfunc='size', fill_value=0)
-        
-#         # 피벗 테이블을 텍스트 테이블로 플롯
-#         table = ax.table(cellText=pivot_table.values, colLabels=pivot_table.columns, rowLabels=pivot_table.index, loc='center')
-#         table.auto_set_font_size(False)
-#         table.set_fontsize(10)  # 폰트 크기 설정
-#         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
-
-#         ax.axis('off')  # 축 비활성화
-
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-    
-#     return ax
 
 # PDF export function
 def export_plots_to_pdf(fig, filename='report.pdf'):

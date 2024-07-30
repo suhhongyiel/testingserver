@@ -32,7 +32,7 @@ def fetch_patient_data(table_name, date_column, time_column=None, start_date=Non
         if start_date and end_date:
             # datetime.date 객체를 datetime.datetime 객체로 변환
             start_date = datetime.combine(start_date, datetime.min.time())
-            end_date = datetime.combine(end_date, datetime.min.time())
+            # end_date = datetime.combine(end_date, datetime.min.time())
             if time_column:
                 df = df[(df['datetime'] >= start_date) & (df['datetime'] <= end_date)]
             else:
@@ -126,16 +126,6 @@ def page_about():
         st.write("Earliest date in the data:", min_date)
         st.write("Latest date in the data:", max_date)
 
-        # max_date = max_date.to_pydatetime()
-        # min_date = min_date.to_pydatetime()
-
-        # if pd.notnull(min_date) and pd.notnull(max_date):
-        #     start_date, last_date = st.slider("날짜 범위 선택:", 
-        #                                     min_value=min_date, 
-        #                                     max_value=max_date, 
-        #                                     value=(min_date, max_date),
-        #                                     format='YYYY-MM-DD')
-
         if min_date and max_date:
             start_date, end_date = st.date_input("Select date range for data", [min_date, max_date], min_value=min_date, max_value=max_date, key="data_date_range")
             start_date = start_date[0] if isinstance(start_date, list) else start_date
@@ -164,31 +154,12 @@ def page_about():
 
     try:
         # last_date = end_date.replace(hour=23, minute=59, second=0)
-        last_date = end_date
-
-        # SQL 형태의 데이터 호출 및 필터링을 쿼리에서 바로 수행
-        # resting_heart_rate_query = text(f"""SELECT * FROM {table_resting_heart_rate} """)
-        # heart_rate_query = text(f"""SELECT * FROM {table_heart_rate} """)
-        # activity_query = text(f"""SELECT * FROM {table_activity} """)
-        # sleep_detail_query = text(f"""SELECT * FROM {table_sleep_detail} """)
+        last_date = pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
 
         df_resting = fetch_patient_data(table_resting_heart_rate, 'date', start_date=start_date, end_date=last_date)
         df_heart = fetch_patient_data(table_heart_rate, 'date', 'time_min',start_date=start_date, end_date=last_date)
         df_sleep_detail = fetch_patient_data(table_sleep_detail, 'date','time_stamp',start_date=start_date, end_date=last_date)
         df_activity =  fetch_patient_data(table_activity, 'date',start_date=start_date, end_date=last_date)
-    
-        # # date를 datetime 형식으로 변환
-        # for df in [resting_heart_rate_df, heart_rate_df, activity_df, sleep_detail_df]:
-        #     df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        #     df.dropna(subset=['date'], inplace=True)  # 날짜 변환 실패한 행 제거
-
-        
-
-        # 필터링된 데이터프레임
-        # df_resting = resting_heart_rate_df[(resting_heart_rate_df['date'] >= start_date) & (resting_heart_rate_df['date'] <= last_date)]
-        # df_heart = heart_rate_df[(heart_rate_df['date'] >= start_date) & (heart_rate_df['date'] <= last_date)]
-        # df_activity = activity_df[(activity_df['date'] >= start_date) & (activity_df['date'] <= last_date)]
-        # df_sleep_detail = sleep_detail_df[(sleep_detail_df['date'] >= start_date) & (sleep_detail_df['date'] <= last_date)]
 
 
         fig = plt.figure(figsize=(15, 20))  # Increase figure size
