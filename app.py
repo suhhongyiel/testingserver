@@ -163,14 +163,18 @@ def page_about():
 
 
         fig = plt.figure(figsize=(15, 20))  # Increase figure size
-        gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[1, 2, 2, 2, 2, 2])
+        gs = gridspec.GridSpec(6, 1, figure=fig, height_ratios=[1, 1, 1, 1, 1, 0])
 
         ax0 = fig.add_subplot(gs[0])
         ax1 = fig.add_subplot(gs[1])
         ax2 = fig.add_subplot(gs[2])
         ax3 = fig.add_subplot(gs[3])
-        ax4 = fig.add_subplot(gs[4])
-        ax5 = fig.add_subplot(gs[5])
+
+        gs_ax45 = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[4:], hspace=0.00)
+
+
+        ax4 = fig.add_subplot(gs_ax45[0])
+        ax5 = fig.add_subplot(gs_ax45[1])
 
         # demographic_area를 맨 위 축에 추가
         ax0 = function.demographic_area(ax0, start_date, last_date, device_info, patient_age, patient_sex, cancer_type, treatment_type)

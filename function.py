@@ -47,19 +47,24 @@ db_url = 'mysql+pymysql://root:Korea2022!@119.67.109.156:3306/project_wd'
 engine = create_engine(db_url)
 
 def heart_rate_plot(ax, df, start_date, end_date):
-    title='Heart Rate Over Time'
+    title = 'Heart Rate Over Time'
     try:
         # Ensure the 'value' column is numeric and 'date' column is datetime
-
+        df['date'] = pd.to_datetime(df['date'])
+        df['value'] = pd.to_numeric(df['value'], errors='coerce')
 
         # Check for any rows with NaT in 'date' column and drop them
-        
+        df = df.dropna(subset=['date'])
+
         # Calculate daily mean and quartiles
-        daily_stats = df.groupby(df['date'].dt.date)['value'].agg(['mean', 'quantile']).reset_index()
+        daily_stats = df.groupby(df['date'].dt.date)['value'].agg(['mean']).reset_index()
         daily_stats['Q1'] = df.groupby(df['date'].dt.date)['value'].quantile(0.25).values
         daily_stats['Q3'] = df.groupby(df['date'].dt.date)['value'].quantile(0.75).values
-        daily_stats.columns = ['date', 'mean', 'quantile', 'Q1', 'Q3']
+        daily_stats.columns = ['date', 'mean', 'Q1', 'Q3']
         daily_stats['date'] = pd.to_datetime(daily_stats['date'])
+
+        # 날짜의 중앙값으로 이동
+        daily_stats['date_mid'] = daily_stats['date'] + pd.Timedelta(hours=12)
 
         # Extend the end date by 2 days
         end_date_extended = pd.to_datetime(end_date)
@@ -67,7 +72,7 @@ def heart_rate_plot(ax, df, start_date, end_date):
         # Filter the data between the specified start and end dates
         start_date_ts = pd.Timestamp(start_date)
         end_date_ts = pd.Timestamp(end_date_extended)
-        df_filtered = daily_stats[(daily_stats['date'] >= start_date_ts) & (daily_stats['date'] <= end_date_ts)]
+        df_filtered = daily_stats[(daily_stats['date_mid'] >= start_date_ts) & (daily_stats['date_mid'] <= end_date_ts)]
 
         # Apply smoothing with a rolling window
         window_size = 1
@@ -75,9 +80,9 @@ def heart_rate_plot(ax, df, start_date, end_date):
         smoothed_Q1 = df_filtered['Q1'].rolling(window=window_size, center=True).mean().fillna(method='bfill').fillna(method='ffill')
         smoothed_Q3 = df_filtered['Q3'].rolling(window=window_size, center=True).mean().fillna(method='bfill').fillna(method='ffill')
 
-        # Plot the data
-        ax.plot(df_filtered['date'], smoothed_mean, label='Mean', color='magenta')
-        ax.fill_between(df_filtered['date'], smoothed_Q1, smoothed_Q3, color='gray', alpha=0.2, label='Q1-Q3 (Interquartile Range)')
+        # Plot the data using 중앙값을 이동한 날짜 사용
+        ax.plot(df_filtered['date_mid'], smoothed_mean, label='Mean', color='magenta')
+        ax.fill_between(df_filtered['date_mid'], smoothed_Q1, smoothed_Q3, color='gray', alpha=0.2, label='Q1-Q3 (Interquartile Range)')
 
         # Set y-axis limit
         ax.set_ylim(0, 200)
@@ -87,9 +92,11 @@ def heart_rate_plot(ax, df, start_date, end_date):
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
         ax.set_xlim([start_date_ts, end_date_ts])
         plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+
         # Set labels and legend
         ax.set_xlabel('Date')
         ax.set_ylabel('Average Heart Rate')
+        ax.xaxis.set_visible(False)
         ax.legend()
         ax.grid(True)
         ax.set_title(title, loc='left')
@@ -100,7 +107,7 @@ def heart_rate_plot(ax, df, start_date, end_date):
         return ax, None
 
 def plot_activity(ax, df, start_date, end_date):
-    title='Activity Plot'
+    title = 'Activity Plot'
 
     try:
         df['date'] = pd.to_datetime(df['date'])
@@ -110,7 +117,10 @@ def plot_activity(ax, df, start_date, end_date):
         df['steps'] = pd.to_numeric(df['steps'], errors='coerce')
         df = df.dropna(subset=['steps'])
         
-        time = df['date']
+        # 날짜의 중앙값 계산
+        df['date_mid'] = df['date'] + pd.Timedelta(hours=12)
+        
+        time = df['date_mid']  # 중앙값으로 설정된 시간을 사용
         steps = df['steps']
 
         total_steps = steps.sum()
@@ -124,7 +134,7 @@ def plot_activity(ax, df, start_date, end_date):
         ax.tick_params(axis='x', rotation=45)
         ax.set_xticklabels([])
 
-        for date in time:
+        for date in df['date']:
             ax.axvline(x=date, color='grey', linestyle='--', alpha=0.5)
 
         df['week'] = df['date'].dt.isocalendar().week
@@ -133,7 +143,7 @@ def plot_activity(ax, df, start_date, end_date):
         ax.xaxis.set_visible(True)
         
         ax.set_xlim([pd.to_datetime(start_date), pd.to_datetime(end_date)])
-        ax.set_xlim(ax.get_xlim()[0] - pd.Timedelta(days=1), ax.get_xlim()[1] + pd.Timedelta(days=1)) # Add padding
+        ax.set_xlim(ax.get_xlim()[0] - pd.Timedelta(days=1), ax.get_xlim()[1] + pd.Timedelta(days=1))  # Add padding
         
         return ax
 
@@ -148,6 +158,7 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
         # 시간 데이터 변환
         slp_df['converted_time'] = slp_df['time_stamp'].apply(normalize_time)
         slp_df['datetime'] = pd.to_datetime(slp_df['date'].dt.date.astype(str) + ' ' + slp_df['converted_time'], errors='coerce')
+
         hrdf['converted_time'] = hrdf['time_min'].apply(normalize_time)
         hrdf['datetime'] = pd.to_datetime(hrdf['date'].dt.date.astype(str) + ' ' + hrdf['converted_time'], errors='coerce')
         
@@ -156,10 +167,9 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
         
         df_based = pd.DataFrame(date_range, columns=['datetime'])
 
-        # hr setting
+        # hr setting: missing 찾는 코드 2면 ok 1 이 면 missing
         hrdf_datetimes = set(hrdf['datetime'])
         df_based['value'] = df_based['datetime'].apply(lambda x: 2 if x in hrdf_datetimes else 1)
-
 
         # 데이터 확장
         expanded_rows = []
@@ -171,18 +181,26 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
             # 시작 시간부터 종료 시간까지 모든 분 생성
             current_datetime = start_datetime
             while current_datetime < end_datetime:
+                current_datetime = current_datetime.replace(second=0)
                 expanded_rows.append({
                     'datetime': current_datetime,
                     'sleep_stage': row['sleep_stage']
                 })
                 current_datetime += pd.Timedelta(minutes=1)
 
+
+
+
         # 확장된 데이터 프레임 생성
         expanded_df = pd.DataFrame(expanded_rows)
+
         expand_datetimes = set(expanded_df['datetime'])
         df_based['events'] = df_based['datetime'].apply(lambda x: 0 if x in expand_datetimes else None)
         df_based['value'] = df_based['events'].combine_first(df_based['value'])
+
+
         df_based.drop('events', axis=1, inplace=True)
+
 
         # 'datetime' 열을 datetime 객체로 변환
         df_based['datetime'] = pd.to_datetime(df_based['datetime'])
@@ -190,25 +208,28 @@ def sleep_graph_ver(ax, slp_df, hrdf, start_date, end_date):
         # 데이터를 날짜와 시간으로 분리
         df_based['date'] = df_based['datetime'].dt.date
         df_based['hour'] = df_based['datetime'].dt.hour
+        df_based['min'] = df_based['datetime'].dt.minute
 
         # 유니크한 날짜를 정렬하여 사용
         unique_dates = df_based['date'].unique()
         unique_dates.sort()
 
         ax.set_xticklabels([])
-        # 각 날짜와 시간대별로 값 플롯
+        # 각 날짜와 시간대별로 값 플로팅
         for date in unique_dates:
             day_data = df_based[df_based['date'] == date]
             for hour in range(24):
                 hour_data = day_data[day_data['hour'] == hour]
-                # if not hour_data.empty:
-                #     value = int(hour_data.iloc[0]['value'])  # 첫 번째 값을 사용하고 정수형으로 변환
-                #     bars = ax.bar(date, 1, bottom=hour, color=['lightcoral', 'lightgray', 'lightgreen'][value % 3], align='edge')
+
                 if not hour_data.empty:
-                    value = int(hour_data.iloc[0]['value'])  # 첫 번째 값을 사용하고 정수형으로 변환
-                    color = ['lightcoral', 'lightgray', 'lightgreen'][value % 3] if value in [0, 1, 2] else 'lightgray'
-                    ax.bar(date, 1, bottom=hour, color=color, align='edge')
-        
+                    # 각 hour 내의 고유한 value 값을 가져옴
+                    for _, row in hour_data.iterrows():
+                        minute = row['min']
+                        value = int(row['value'])
+                        color = ['lightcoral', 'lightgray', 'lightgreen'][value % 3] if value in [0, 1, 2] else 'lightgray'
+
+                        # 1시간을 60분으로 나누어 해당 분 위치에 바를 그림
+                        ax.bar(date, 1/60, bottom=hour + minute/60, color=color, align='edge')
 
         # 그리드 설정
         ax.grid(True, which='both', axis='both', linestyle='--', linewidth=0.5)
@@ -248,7 +269,6 @@ def plot_compliance(ax, df, start_date, end_date):
         df['date'] = df['datetime'].dt.date
         daily_compliance = df.groupby('date')['valid'].sum()
         daily_total = df.groupby('date')['valid'].count()
-        st.write(daily_compliance)
         # Calculate daily compliance rate
         daily_compliance_rate = (daily_compliance / 1440) * 100
 
@@ -257,7 +277,6 @@ def plot_compliance(ax, df, start_date, end_date):
             'date': daily_compliance_rate.index,
             'compliance_rate': daily_compliance_rate.values
         })
-        st.write(compliance_df)
         # Plot the daily compliance rate
         compliance_df.set_index('date')['compliance_rate'].plot(kind='bar', color='skyblue', ax=ax)
 
@@ -310,20 +329,21 @@ def sleep_table_area(ax, df, start_date, end_date):
         # 날짜별 라벨 집계
         df['date'] = df['datetime'].dt.date
         unique_dates = sorted(df['date'].unique())
+        
+        # 날짜를 'day/month' 형식으로 변환
+        formatted_dates = [date.strftime('%m/%d') for date in unique_dates]
         date_index_map = {date: idx for idx, date in enumerate(unique_dates)}
         df['date_index'] = df['date'].map(date_index_map)
-        
-        st.write(df)
+
         df['label'] = df['value'].map({0: 'sleep', 1: 'missing', 2: 'wake'})
         
         # 라벨별 갯수 / 60 으로 해당 값을 H 로 치환
         daily_counts = df.groupby(['date', 'label']).size().unstack(fill_value=0)
         daily_counts = (daily_counts / 60).round(1)
         pivot_table = daily_counts.T
-
-
+        
         original_col_labels = list(pivot_table.columns)
-        col_labels = replace_with_empty_at_interval(original_col_labels)
+        col_labels = replace_with_empty_at_interval(formatted_dates)
 
         # 피벗 테이블을 텍스트 테이블로 플롯
         table = ax.table(cellText=pivot_table.values, colLabels=col_labels, rowLabels=pivot_table.index, loc='center')
@@ -331,7 +351,7 @@ def sleep_table_area(ax, df, start_date, end_date):
         table.set_fontsize(10)  # 폰트 크기 설정
         table.scale(1.0, 1.5)  # 표 크기 조정 (너비, 높이)
         
-                # 색상 정의
+        # 색상 정의
         colors = {
             'sleep': mcolors.CSS4_COLORS['lightcoral'],
             'missing': mcolors.CSS4_COLORS['lightgrey'],
@@ -343,14 +363,12 @@ def sleep_table_area(ax, df, start_date, end_date):
             for j in range(len(col_labels)):
                 table[(i+1, j)].set_facecolor(colors.get(key, 'white'))
 
-
         ax.axis('off')  # 축 비활성화
 
     except Exception as e:
         print(f"An error occurred: {e}")
     
     return ax
-
 # PDF export function
 def export_plots_to_pdf(fig, filename='report.pdf'):
     with PdfPages(filename) as pdf:
